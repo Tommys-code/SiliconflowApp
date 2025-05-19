@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="title">SiliconFlowAI</string>
+    <string name="add_key_title">添加SiliconCloud-API密钥</string>
+    <string name="add_key_hilt">请输入API密钥</string>
+    <string name="confirm">确定</string>
+</resources>
