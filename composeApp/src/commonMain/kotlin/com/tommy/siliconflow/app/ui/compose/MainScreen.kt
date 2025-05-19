@@ -52,33 +52,17 @@ import siliconflowapp.composeapp.generated.resources.title
 internal fun MainScreen(
     viewModel: MainViewModel = koinViewModel()
 ) {
-    var showContent by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     ModalNavigationDrawer(
         drawerContent = { DrawerContent(viewModel) },
         drawerState = viewModel.drawerState,
     ) {
         Scaffold(
-            modifier = Modifier.fillMaxSize(), topBar = {
+            modifier = Modifier.fillMaxSize(),
+            topBar = {
                 HomeTopAppBar { viewModel.toggleDrawer(coroutineScope) }
             }) { innerPadding ->
-            Column(
-                modifier = Modifier.padding(innerPadding).fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Button(onClick = { showContent = !showContent }) {
-                    Text("Click me!")
-                }
-                AnimatedVisibility(showContent) {
-                    val greeting = remember { Greeting().greet() }
-                    Column(
-                        Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        Image(painterResource(Res.drawable.compose_multiplatform), null)
-                        Text("Compose: $greeting")
-                    }
-                }
-            }
+            ChatView(modifier = Modifier.padding(innerPadding), viewModel)
         }
     }
 }
@@ -113,7 +97,8 @@ internal fun DrawerContent(
             Icon(
                 painter = painterResource(Res.drawable.ic_settings),
                 contentDescription = "setting",
-                modifier = Modifier.clickable { })
+                modifier = Modifier.clickable { }
+            )
         }
     }
 }

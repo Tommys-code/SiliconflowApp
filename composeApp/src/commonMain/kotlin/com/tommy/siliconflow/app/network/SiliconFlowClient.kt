@@ -15,6 +15,7 @@ import io.ktor.client.plugins.defaultRequest
 import io.ktor.client.plugins.logging.LogLevel
 import io.ktor.client.plugins.logging.Logger
 import io.ktor.client.plugins.logging.Logging
+import io.ktor.client.plugins.sse.SSE
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
@@ -59,6 +60,34 @@ class SiliconFlowClient(private val dataStore: SettingDataStore) {
                         generateExceptionFromErrorBody(it)
                     }?.let { e ->
                         throw e
+                    }
+                }
+            }
+        }
+    }
+
+    fun buildSSEClient(): HttpClient {
+        return HttpClient {
+            defaultRequest {
+                contentType(ContentType.Application.Json)
+                url(BASE_URL)
+            }
+            install(SSE)
+            install(ContentNegotiation) {
+                json(json = JsonSerializationHelper.jsonX())
+            }
+            install(Logging) {
+                logger = object : Logger {
+                    override fun log(message: String) {
+                        println(message)
+                    }
+                }
+                level = LogLevel.ALL
+            }
+            install(Auth) {
+                bearer {
+                    loadTokens {
+                        BearerTokens(getApiKey(), null)
                     }
                 }
             }

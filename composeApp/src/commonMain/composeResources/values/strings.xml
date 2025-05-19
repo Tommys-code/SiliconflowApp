@@ -4,4 +4,5 @@
     <string name="add_key_title">添加SiliconCloud-API密钥</string>
     <string name="add_key_hilt">请输入API密钥</string>
     <string name="confirm">确定</string>
+    <string name="enter_question">请输入问题</string>
 </resources>
