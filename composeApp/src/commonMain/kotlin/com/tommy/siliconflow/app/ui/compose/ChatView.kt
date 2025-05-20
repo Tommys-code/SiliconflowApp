@@ -1,11 +1,13 @@
 package com.tommy.siliconflow.app.ui.compose
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
@@ -17,11 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.stringResource
 import siliconflowapp.composeapp.generated.resources.Res
@@ -33,17 +37,26 @@ internal fun ChatView(
     viewModel: MainViewModel,
 ) {
     val ques = remember { mutableStateOf("") }
-    val localAnswer = remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
     val listState = rememberLazyListState()
 
+    val chatHistory = viewModel.chatHistory.collectAsStateWithLifecycle(emptyList())
+
     Column(modifier = modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxWidth().weight(1f),
+            modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 16.dp),
             state = listState
         ) {
-            item {
-                Text(localAnswer.value)
+            items(chatHistory.value) { chat ->
+                chat.send?.let {
+                    Text(
+                        it.content,
+                        modifier = Modifier.align(Alignment.End).background(Color.Gray),
+                    )
+                }
+                chat.receive?.let {
+                    Text(it.content)
+                }
             }
         }
         Card(
@@ -70,12 +83,6 @@ internal fun ChatView(
                     }
                 })
             )
-        }
-    }
-
-    LaunchedEffect(viewModel.answer) {
-        viewModel.answer.collect { value ->
-            localAnswer.value += value // 安全更新本地状态
         }
     }
 }
