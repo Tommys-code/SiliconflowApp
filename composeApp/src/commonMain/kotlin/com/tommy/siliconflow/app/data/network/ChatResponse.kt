@@ -1,4 +1,4 @@
-package com.tommy.siliconflow.app.data
+package com.tommy.siliconflow.app.data.network
 
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable

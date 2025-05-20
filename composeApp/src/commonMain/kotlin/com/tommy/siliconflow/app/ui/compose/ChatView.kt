@@ -16,8 +16,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -28,9 +26,6 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.ChatResult
-import com.tommy.siliconflow.app.data.db.ChatHistory
-import com.tommy.siliconflow.app.extensions.getChoiceDelta
-import com.tommy.siliconflow.app.extensions.getContent
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.stringResource
 import siliconflowapp.composeapp.generated.resources.Res
@@ -47,14 +42,6 @@ internal fun ChatView(
 
     val localAnswer = viewModel.answer.collectAsStateWithLifecycle()
     val chatHistory = viewModel.chatHistory.collectAsStateWithLifecycle(emptyList())
-
-//    LaunchedEffect(viewModel.answer) {
-//        viewModel.answer.collect { value ->
-//            if (value is ChatResult.Progress) {
-//                localAnswer.value = value.data.content // 安全更新本地状态
-//            }
-//        }
-//    }
 
     Column(modifier = modifier.fillMaxSize()) {
         LazyColumn(

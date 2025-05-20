@@ -14,6 +14,7 @@ interface ChatHistoryStore {
     fun getSessionList(): Flow<List<Session>>
     fun getChatHistory(sessionID: Long): Flow<List<ChatHistory>>
 
+    suspend fun updateSession(session: Session): Boolean
     suspend fun createSession(title: String): Session
     suspend fun insertSendHistory(sessionID: Long, content: String)
     suspend fun insertReceiveHistory(sessionID: Long, content: ChatContent)
@@ -44,7 +45,12 @@ class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistorySt
     }
 
     override suspend fun insertReceiveHistory(sessionID: Long, content: ChatContent) {
-        appDatabase.chatHistoryDao().insert(content.receiveHistory(sessionID, Clock.System.now().toEpochMilliseconds()))
+        appDatabase.chatHistoryDao()
+            .insert(content.receiveHistory(sessionID, Clock.System.now().toEpochMilliseconds()))
+    }
+
+    override suspend fun updateSession(session: Session): Boolean {
+        return appDatabase.sessionDao().updateSession(session) > 0
     }
 
     private suspend fun insertHistory(history: ChatHistory) {

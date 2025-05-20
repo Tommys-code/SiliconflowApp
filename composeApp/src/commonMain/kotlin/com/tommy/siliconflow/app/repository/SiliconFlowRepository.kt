@@ -1,8 +1,8 @@
 package com.tommy.siliconflow.app.repository
 
 import com.tommy.siliconflow.app.data.Resource
-import com.tommy.siliconflow.app.data.UserInfo
-import com.tommy.siliconflow.app.data.UserInfoResponse
+import com.tommy.siliconflow.app.data.network.UserInfo
+import com.tommy.siliconflow.app.data.network.UserInfoResponse
 import com.tommy.siliconflow.app.datasbase.SettingDataStore
 import com.tommy.siliconflow.app.network.error.ApiKeyEmptyException
 import com.tommy.siliconflow.app.network.service.SiliconFlowService

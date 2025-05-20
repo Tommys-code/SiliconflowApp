@@ -1,8 +1,8 @@
 package com.tommy.siliconflow.app.extensions
 
-import com.tommy.siliconflow.app.data.ChatResponse
+import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.ChatResult
-import com.tommy.siliconflow.app.data.ChoiceDelta
+import com.tommy.siliconflow.app.data.network.ChoiceDelta
 import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role

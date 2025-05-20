@@ -1,14 +1,34 @@
 package com.tommy.siliconflow.app.viewmodel
 
-import androidx.compose.material3.DrawerState
-import androidx.compose.material3.DrawerValue
+import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tommy.siliconflow.app.data.MainDialog
+import com.tommy.siliconflow.app.data.MainViewState
+import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.datasbase.SettingDataStore
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.edit_session_name_error
+import siliconflowapp.composeapp.generated.resources.edit_session_name_success
+
+sealed class MainViewEvent {
+    data class Navigate(val route: String) : MainViewEvent()
+    data class ShowToast(val msg: String? = null, val msgRes: StringResource? = null) : MainViewEvent()
+
+    data class ToggleDrawer(val scope: CoroutineScope) : MainViewEvent()
+    data class ChangeSession(val session: Session?) : MainViewEvent()
+    data class ShowPopup(val session: Session, val offset: IntOffset) : MainViewEvent()
+    data object DismissPopup : MainViewEvent()
+    data class ShowOrHideDialog(val dialog: MainDialog?) : MainViewEvent()
+    data class EditSessionName(val session: Session) : MainViewEvent()
+}
 
 class MainViewModel(
     private val settingDataStore: SettingDataStore,
@@ -18,20 +38,42 @@ class MainViewModel(
 
     val userInfo = siliconFlowRepository.userInfo
 
-    private val _drawerState = DrawerState(DrawerValue.Closed)
-    val drawerState: DrawerState
-        get() = _drawerState
+    val mainViewState = MainViewState()
+
+    private val _viewEvent = MutableSharedFlow<MainViewEvent>()
+    val viewEvent: SharedFlow<MainViewEvent> = _viewEvent
 
     val sessionList = chatRepository.sessionList
+    val currentSession = chatRepository.currentSession
     val chatHistory = chatRepository.chatHistory
     val answer = chatRepository.answer
 
-    fun toggleDrawer(scope: CoroutineScope) {
-        scope.launch {
-            drawerState.apply {
-                if (isOpen) close() else open()
+    init {
+        viewModelScope.launch {
+            viewEvent.collect {
+                when (it) {
+                    is MainViewEvent.ToggleDrawer -> mainViewState.toggleDrawer(it.scope)
+                    is MainViewEvent.ChangeSession -> chatRepository.changeSession(it.session)
+                    is MainViewEvent.ShowPopup -> mainViewState.showPopup(it.session, it.offset)
+                    MainViewEvent.DismissPopup -> mainViewState.dismissPopup()
+                    is MainViewEvent.ShowOrHideDialog -> mainViewState.showOrHideDialog(it.dialog)
+                    is MainViewEvent.EditSessionName -> {
+                        val res = if (chatRepository.changeSessionName(it.session)) {
+                            Res.string.edit_session_name_success
+                        } else {
+                            Res.string.edit_session_name_error
+                        }
+                        doEvent(MainViewEvent.ShowToast(msgRes = res))
+                    }
+
+                    else -> {}
+                }
             }
         }
+    }
+
+    fun doEvent(event: MainViewEvent) {
+        viewModelScope.launch { _viewEvent.emit(event) }
     }
 
     fun sendData(data: String) {

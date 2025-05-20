@@ -1,6 +1,6 @@
 package com.tommy.siliconflow.app.extensions
 
-import com.tommy.siliconflow.app.data.ChatResponse
+import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.ChatResult
 import com.tommy.siliconflow.app.network.JsonSerializationHelper
 import io.ktor.client.HttpClient

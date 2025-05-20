@@ -1,7 +1,7 @@
 package com.tommy.siliconflow.app.network.service
 
-import com.tommy.siliconflow.app.data.ChatRequest
-import com.tommy.siliconflow.app.data.ChatResponse
+import com.tommy.siliconflow.app.data.network.ChatRequest
+import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.ChatResult
 import com.tommy.siliconflow.app.extensions.sseChat
 import io.ktor.client.HttpClient

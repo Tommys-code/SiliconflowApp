@@ -1,6 +1,6 @@
 package com.tommy.siliconflow.app.network.service
 
-import com.tommy.siliconflow.app.data.UserInfoResponse
+import com.tommy.siliconflow.app.data.network.UserInfoResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth

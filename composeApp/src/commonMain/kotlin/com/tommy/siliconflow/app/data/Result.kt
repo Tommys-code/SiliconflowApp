@@ -1,5 +1,7 @@
 package com.tommy.siliconflow.app.data
 
+import com.tommy.siliconflow.app.data.network.UserInfo
+
 
 sealed class Resource<T>(val result: T?) {
     data class Loading<T>(val loading: Boolean = false) : Resource<T>(null)

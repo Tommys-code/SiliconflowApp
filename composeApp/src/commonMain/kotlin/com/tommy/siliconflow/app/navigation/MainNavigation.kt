@@ -19,6 +19,6 @@ fun MainNavigation() {
             SplashScreen({ navController.navigateAndPopBackStack(it) })
         }
         composable(Route.LOGIN_SCREEN) { LoginScreen({ navController.navigateAndPopBackStack(it) }) }
-        composable(Route.MAIN_SCREEN) { MainScreen() }
+        composable(Route.MAIN_SCREEN) { MainScreen { navController.navigate(it) } }
     }
 }

@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
+import androidx.room.Update
 import com.tommy.siliconflow.app.data.db.Session
 import kotlinx.coroutines.flow.Flow
 
@@ -18,6 +19,9 @@ interface SessionDao {
         val id = insert(session)
         return getById(id)
     }
+
+    @Update
+    suspend fun updateSession(session: Session): Int
 
     @Query("UPDATE Session SET updateTime = :newTime WHERE id = :sessionId")
     suspend fun updateTime(sessionId: Long, newTime: Long)
