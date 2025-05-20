@@ -39,4 +39,10 @@ enum class Role(val value: String) {
     SYSTEM("system"),
     USER("user"),
     ASSISTANT("assistant");
+
+    companion object {
+        fun valueOfIgnoreCase(name: String): Role {
+            return enumValues<Role>().first { it.name.equals(name, ignoreCase = true) }
+        }
+    }
 }

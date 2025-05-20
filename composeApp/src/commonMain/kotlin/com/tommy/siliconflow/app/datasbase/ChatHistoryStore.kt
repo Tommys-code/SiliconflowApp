@@ -4,6 +4,7 @@ import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.extensions.receiveHistory
 import com.tommy.siliconflow.app.extensions.sendHistory
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Clock
@@ -13,8 +14,9 @@ interface ChatHistoryStore {
     fun getSessionList(): Flow<List<Session>>
     fun getChatHistory(sessionID: Long): Flow<List<ChatHistory>>
 
-    suspend fun createSession(title: String): Long
+    suspend fun createSession(title: String): Session
     suspend fun insertSendHistory(sessionID: Long, content: String)
+    suspend fun insertReceiveHistory(sessionID: Long, content: ChatContent)
 }
 
 @OptIn(ExperimentalTime::class)
@@ -28,17 +30,21 @@ class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistorySt
         return appDatabase.chatHistoryDao().getChatByID(sessionID)
     }
 
-    override suspend fun createSession(title: String): Long {
+    override suspend fun createSession(title: String): Session {
         val time = Clock.System.now().toEpochMilliseconds()
-        val id = appDatabase.sessionDao().insert(Session(title = title, updateTime = time))
-        insertHistory(ChatContent(title, Role.USER).sendHistory(id, time))
-        return id
+        val session = appDatabase.sessionDao().insertAndGet(Session(title = title, updateTime = time))
+        insertHistory(ChatContent(title, Role.USER).sendHistory(session.id, time))
+        return session
     }
 
     override suspend fun insertSendHistory(sessionID: Long, content: String) {
-        appDatabase.chatHistoryDao().insert(
-            ChatContent(content, Role.USER).sendHistory(sessionID, Clock.System.now().toEpochMilliseconds())
-        )
+        val time = Clock.System.now().toEpochMilliseconds()
+        appDatabase.chatHistoryDao().insert(ChatContent(content, Role.USER).sendHistory(sessionID, time))
+        appDatabase.sessionDao().updateTime(sessionID, time)
+    }
+
+    override suspend fun insertReceiveHistory(sessionID: Long, content: ChatContent) {
+        appDatabase.chatHistoryDao().insert(content.receiveHistory(sessionID, Clock.System.now().toEpochMilliseconds()))
     }
 
     private suspend fun insertHistory(history: ChatHistory) {

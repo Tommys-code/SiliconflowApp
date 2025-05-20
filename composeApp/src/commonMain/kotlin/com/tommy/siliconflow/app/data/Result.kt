@@ -11,8 +11,8 @@ sealed class Resource<T>(val result: T?) {
     }
 }
 
-sealed class ChatResult {
-    data object Start : ChatResult()
-    data class Progress(val data: ChatResponse) : ChatResult()
-    data object Finish : ChatResult()
+sealed class ChatResult<out T> {
+    data object Start : ChatResult<Nothing>()
+    data class Progress<T>(val data: T) : ChatResult<T>()
+    data object Finish : ChatResult<Nothing>()
 }

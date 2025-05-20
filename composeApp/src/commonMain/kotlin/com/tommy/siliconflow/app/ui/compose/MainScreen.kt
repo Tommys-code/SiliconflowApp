@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -29,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -64,6 +66,7 @@ internal fun DrawerContent(
     modifier: Modifier = Modifier,
 ) {
     val userInfo = viewModel.userInfo.collectAsState(null).value?.result
+    val sessionList = viewModel.sessionList.collectAsStateWithLifecycle(emptyList()).value
     Column(
         modifier = modifier.fillMaxHeight().fillMaxWidth(0.7f).background(Color.White)
             .safeContentPadding(),
@@ -74,7 +77,11 @@ internal fun DrawerContent(
             modifier = Modifier.padding(vertical = 20.dp, horizontal = 12.dp)
         )
         HorizontalDivider()
-        LazyColumn(modifier = Modifier.weight(1f)) { }
+        LazyColumn(modifier = Modifier.weight(1f)) {
+            items(sessionList) {
+                Text(it.title)
+            }
+        }
         HorizontalDivider()
         Row(
             modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 12.dp),
