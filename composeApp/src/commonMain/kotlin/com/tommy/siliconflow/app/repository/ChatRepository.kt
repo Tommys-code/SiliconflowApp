@@ -25,7 +25,7 @@ import kotlinx.coroutines.launch
 class ChatRepository(
     private val sseService: SSEService,
     private val chatHistoryStore: ChatHistoryStore,
-    private val scope: CoroutineScope,
+    scope: CoroutineScope,
 ) {
 
     val sessionList = chatHistoryStore.getSessionList()
@@ -46,14 +46,17 @@ class ChatRepository(
     }
 
     suspend fun sendData(data: String) {
-        currentSession.value?.let {
+        val chatID: Long = currentSession.value?.let {
             chatHistoryStore.insertSendHistory(it.id, data)
         } ?: run {
-            chatHistoryStore.createSession(data).let { _currentSession.value = it }
+            chatHistoryStore.createSession(data).let {
+                _currentSession.value = it.first
+                it.second
+            }
         }
         _answer.emit(ChatResult.Start)
         sseService.chatCompletions(ChatRequest(messages = listOf(Message(Role.USER.value, data)))).collect {
-            updateAnswer(it)
+            updateAnswer(it, chatID)
         }
     }
 
@@ -61,10 +64,10 @@ class ChatRepository(
         _currentSession.value = session
     }
 
-    private suspend fun updateAnswer(data: ChatResult<ChatResponse>) {
+    private suspend fun updateAnswer(data: ChatResult<ChatResponse>, chatID: Long) {
         if (data is ChatResult.Finish) {
             (_answer.value as? ChatResult.Progress)?.let {
-                chatHistoryStore.insertReceiveHistory(currentSession.value!!.id, it.data)
+                chatHistoryStore.updateReceiveHistory(chatID, it.data)
             }
         }
 

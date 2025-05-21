@@ -12,4 +12,7 @@ object CommonColor {
 
     @Stable
     val LightRed = Color(0x70FF0000)
+
+    @Stable
+    val ChatBoxBg = Color(0xFFDDDDDD)
 }

@@ -16,9 +16,9 @@ interface ChatHistoryStore {
 
     suspend fun updateSession(session: Session): Boolean
     suspend fun deleteSession(session: List<Session>): Boolean
-    suspend fun createSession(title: String): Session
-    suspend fun insertSendHistory(sessionID: Long, content: String)
-    suspend fun insertReceiveHistory(sessionID: Long, content: ChatContent)
+    suspend fun createSession(title: String): Pair<Session, Long>
+    suspend fun insertSendHistory(sessionID: Long, content: String): Long
+    suspend fun updateReceiveHistory(chatID: Long, content: ChatContent)
 }
 
 @OptIn(ExperimentalTime::class)
@@ -32,30 +32,32 @@ class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistorySt
         return appDatabase.chatHistoryDao().getChatByID(sessionID)
     }
 
-    override suspend fun createSession(title: String): Session {
+    override suspend fun createSession(title: String): Pair<Session, Long> {
         val time = Clock.System.now().toEpochMilliseconds()
         val session = appDatabase.sessionDao().insertAndGet(Session(title = title, updateTime = time))
-        insertHistory(ChatContent(title, Role.USER).sendHistory(session.id, time))
-        return session
+        val chatID = insertHistory(ChatContent(title, Role.USER).sendHistory(session.id, time))
+        return session to chatID
     }
 
-    override suspend fun insertSendHistory(sessionID: Long, content: String) {
+    override suspend fun insertSendHistory(sessionID: Long, content: String): Long {
         val time = Clock.System.now().toEpochMilliseconds()
-        appDatabase.chatHistoryDao().insert(ChatContent(content, Role.USER).sendHistory(sessionID, time))
+        val id =
+            appDatabase.chatHistoryDao().insert(ChatContent(content, Role.USER).sendHistory(sessionID, time))
         appDatabase.sessionDao().updateTime(sessionID, time)
+        return id
     }
 
-    override suspend fun insertReceiveHistory(sessionID: Long, content: ChatContent) {
-        appDatabase.chatHistoryDao()
-            .insert(content.receiveHistory(sessionID, Clock.System.now().toEpochMilliseconds()))
+    override suspend fun updateReceiveHistory(chatID: Long, content: ChatContent) {
+        appDatabase.chatHistoryDao().updateReceive(chatID, content.content, content.role)
+//            .insert(content.receiveHistory(sessionID, Clock.System.now().toEpochMilliseconds()))
     }
 
     override suspend fun updateSession(session: Session): Boolean {
         return appDatabase.sessionDao().updateSession(session) > 0
     }
 
-    private suspend fun insertHistory(history: ChatHistory) {
-        appDatabase.chatHistoryDao().insert(history)
+    private suspend fun insertHistory(history: ChatHistory): Long {
+        return appDatabase.chatHistoryDao().insert(history)
     }
 
     override suspend fun deleteSession(session: List<Session>): Boolean {

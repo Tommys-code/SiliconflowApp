@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.ui.compose
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,9 +10,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -20,12 +23,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.ChatResult
+import com.tommy.siliconflow.app.ui.theme.CommonColor
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.stringResource
 import siliconflowapp.composeapp.generated.resources.Res
@@ -50,10 +55,25 @@ internal fun ChatView(
         ) {
             items(chatHistory.value) { chat ->
                 chat.send?.let {
-                    Text(
-                        it.content,
-                        modifier = Modifier.align(Alignment.End).background(Color.Gray),
-                    )
+                    Box(
+                        modifier = Modifier.fillMaxWidth(),
+                        contentAlignment = Alignment.CenterEnd,
+                    ) {
+                        Text(
+                            it.content,
+                            modifier = Modifier
+                                .clip(
+                                    RoundedCornerShape(
+                                        topStart = 12.dp,
+                                        topEnd = 12.dp,
+                                        bottomStart = 12.dp,
+                                    )
+                                )
+                                .background(CommonColor.ChatBoxBg)
+                                .padding(horizontal = 20.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.bodyLarge,
+                        )
+                    }
                 }
                 chat.receive?.let {
                     Text(it.content)
@@ -86,6 +106,7 @@ internal fun ChatView(
                     if (ques.value.isNotBlank()) {
                         focusManager.clearFocus()
                         viewModel.sendData(ques.value)
+                        ques.value = ""
                     }
                 })
             )
