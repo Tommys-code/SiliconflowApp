@@ -83,7 +83,7 @@ class ChatRepository(
         return chatHistoryStore.updateSession(session)
     }
 
-    suspend fun deleteSession(session: Session): Boolean {
+    suspend fun deleteSession(session: List<Session>): Boolean {
         return chatHistoryStore.deleteSession(session)
     }
 }

@@ -25,7 +25,7 @@ interface SessionDao {
     suspend fun updateSession(session: Session): Int
 
     @Delete
-    suspend fun deleteSession(session: Session): Int
+    suspend fun deleteSession(session: List<Session>): Int
 
     @Query("UPDATE Session SET updateTime = :newTime WHERE id = :sessionId")
     suspend fun updateTime(sessionId: Long, newTime: Long)

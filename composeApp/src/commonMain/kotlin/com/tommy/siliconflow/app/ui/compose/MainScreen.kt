@@ -21,6 +21,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -112,48 +113,9 @@ internal fun MainScreen(
     }
 }
 
-@Composable
-internal fun DrawerContent(
-    viewModel: MainViewModel,
-    modifier: Modifier = Modifier,
-    postEvent: (MainViewEvent) -> Unit,
-) {
-    val userInfo = viewModel.userInfo.collectAsState(null).value?.result
-    val sessionList = viewModel.sessionList.collectAsStateWithLifecycle(emptyList()).value
-    val currentSession = viewModel.currentSession.collectAsStateWithLifecycle().value
-    Column(
-        modifier = modifier.fillMaxHeight().fillMaxWidth(0.7f).background(Color.White)
-            .safeContentPadding(),
-    ) {
-        Text(
-            stringResource(Res.string.title),
-            style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 20.dp, horizontal = 12.dp)
-        )
-        HorizontalDivider()
-        DrawerCenterList(sessionList, currentSession, postEvent)
-        HorizontalDivider()
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp, horizontal = 12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            ImageItem(
-                userInfo?.image,
-                modifier = Modifier.padding(end = 8.dp).size(36.dp).clip(CircleShape)
-            )
-            Text(userInfo?.name.orEmpty(), modifier.weight(1f))
-            Icon(
-                painter = painterResource(Res.drawable.ic_settings),
-                contentDescription = "setting",
-                modifier = Modifier.clickable { }
-            )
-        }
-    }
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-internal fun HomeTopAppBar(doEvent: (MainViewEvent) -> Unit) {
+private fun HomeTopAppBar(doEvent: (MainViewEvent) -> Unit) {
     val coroutineScope = rememberCoroutineScope()
     CenterAlignedTopAppBar(title = {}, navigationIcon = {
         IconButton(onClick = { doEvent(MainViewEvent.ToggleDrawer(coroutineScope)) }) {
@@ -163,79 +125,4 @@ internal fun HomeTopAppBar(doEvent: (MainViewEvent) -> Unit) {
             )
         }
     })
-}
-
-@Composable
-internal fun ColumnScope.DrawerCenterList(
-    sessionList: List<Session>,
-    currentSession: Session?,
-    doEvent: (MainViewEvent) -> Unit,
-) {
-    var boxRect by remember { mutableStateOf(Rect.Zero) }
-    val coroutineScope = rememberCoroutineScope()
-    LazyColumn(modifier = Modifier.weight(1f)) {
-        item {
-            Button(
-                onClick = {
-                    doEvent.invoke(MainViewEvent.ChangeSession(null))
-                    doEvent.invoke(MainViewEvent.ToggleDrawer(coroutineScope))
-                },
-                shape = RoundedCornerShape(size = 10.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = CommonColor.LightGray
-                ),
-                modifier = Modifier.fillMaxWidth().height(48.dp)
-                    .padding(start = 6.dp, end = 6.dp, top = 8.dp, bottom = 2.dp),
-            ) {
-                Icon(
-                    painterResource(Res.drawable.ic_circle_add),
-                    modifier = Modifier.padding(end = 8.dp).size(24.dp),
-                    tint = Color.Black,
-                    contentDescription = "add",
-                )
-                Text(
-                    stringResource(Res.string.create_new_session),
-                    color = Color.Black,
-                    style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
-                )
-            }
-            HorizontalDivider(
-                thickness = 0.5.dp,
-                modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)
-            )
-        }
-        itemsIndexed(sessionList) { index, data ->
-            Text(
-                data.title,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 6.dp)
-                    .onGloballyPositioned {
-                        if (index == 0) {
-                            boxRect = it.boundsInWindow()
-                        }
-                    }
-                    .pointerInput(key1 = data.title) {
-                        detectTapGestures(
-                            onLongPress = { offset ->
-                                val windowOffset = IntOffset(
-                                    (boxRect.left + offset.x).toInt(),
-                                    (boxRect.top + index * boxRect.height + offset.y).toInt()
-                                )
-                                doEvent(MainViewEvent.ShowPopup(data, windowOffset))
-                            },
-                            onTap = { _ ->
-                                doEvent.invoke(MainViewEvent.ChangeSession(data))
-                                doEvent.invoke(MainViewEvent.ToggleDrawer(coroutineScope))
-                            },
-                        )
-                    }
-                    .clip(RoundedCornerShape(size = 10.dp))
-                    .background(if (currentSession == data) CommonColor.LightGray else Color.Transparent)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
-                style = MaterialTheme.typography.bodyLarge,
-                fontWeight = if (currentSession == data) FontWeight.Bold else FontWeight.Normal,
-            )
-        }
-    }
 }

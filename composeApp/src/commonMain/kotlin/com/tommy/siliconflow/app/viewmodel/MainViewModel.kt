@@ -12,6 +12,8 @@ import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.last
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import siliconflowapp.composeapp.generated.resources.Res
@@ -30,7 +32,10 @@ sealed class MainViewEvent {
     data object DismissPopup : MainViewEvent()
     data class ShowOrHideDialog(val dialog: MainDialog?) : MainViewEvent()
     data class EditSessionName(val session: Session) : MainViewEvent()
-    data class DeleteSession(val session: Session) : MainViewEvent()
+    data class DeleteSession(val session: List<Session>) : MainViewEvent()
+    data class MultipleSelectionMode(val open: Boolean) : MainViewEvent()
+    data class SessionCheck(val session: Session) : MainViewEvent()
+    data object CheckAll : MainViewEvent()
 }
 
 class MainViewModel(
@@ -78,6 +83,9 @@ class MainViewModel(
                         doEvent(MainViewEvent.ShowToast(msgRes = res))
                     }
 
+                    is MainViewEvent.MultipleSelectionMode -> mainViewState.multipleSelection(it.open)
+                    is MainViewEvent.SessionCheck -> mainViewState.sessionCheck(it.session)
+                    MainViewEvent.CheckAll -> mainViewState.checkAll(sessionList.first())
                     else -> {}
                 }
             }

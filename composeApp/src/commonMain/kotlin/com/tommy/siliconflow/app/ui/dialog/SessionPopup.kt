@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -29,6 +30,7 @@ import org.jetbrains.compose.resources.stringResource
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.delete
 import siliconflowapp.composeapp.generated.resources.edit_session_name
+import siliconflowapp.composeapp.generated.resources.mul_select
 
 @Composable
 internal fun SessionPopup(
@@ -57,6 +59,10 @@ internal fun SessionPopup(
                     .background(Color.White)
                     .padding(vertical = 8.dp),
             ) {
+                PopupItem(Res.string.mul_select, doEvent) {
+                    doEvent.invoke(MainViewEvent.MultipleSelectionMode(true))
+                }
+                HorizontalDivider(thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 10.dp))
                 PopupItem(Res.string.edit_session_name, doEvent) {
                     doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.EditSessionName(state.session)))
                 }

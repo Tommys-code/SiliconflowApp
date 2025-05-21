@@ -37,7 +37,8 @@ internal fun MainViewDialog(
     mainDialogState.collectAsState().value?.let {
         when (it) {
             is MainDialog.EditSessionName -> EditSessionNameDialog(it.session, doEvent)
-            is MainDialog.DeleteSession -> DeleteSessionDialog(it.session, doEvent)
+            is MainDialog.DeleteSession -> DeleteSessionDialog(listOf(it.session), doEvent)
+            is MainDialog.DeleteSessions -> DeleteSessionDialog(it.sessions, doEvent)
         }
     }
 }
@@ -92,7 +93,7 @@ private fun EditSessionNameDialog(
 
 @Composable
 private fun DeleteSessionDialog(
-    session: Session,
+    session: List<Session>,
     doEvent: (MainViewEvent) -> Unit,
 ) {
     CommonDialog(
