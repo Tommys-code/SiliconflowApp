@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.tommy.siliconflow.app.extensions.navigateAndClearAll
 import com.tommy.siliconflow.app.extensions.navigateAndPopBackStack
 import com.tommy.siliconflow.app.ui.compose.LoginScreen
 import com.tommy.siliconflow.app.ui.compose.MainScreen
@@ -21,6 +22,11 @@ fun MainNavigation() {
         }
         composable(Route.LOGIN_SCREEN) { LoginScreen({ navController.navigateAndPopBackStack(it) }) }
         composable(Route.MAIN_SCREEN) { MainScreen { navController.navigate(it) } }
-        composable(Route.PERSONAL_INFO_SCREEN) { UserInfoScreen({ navController.popBackStack() }) }
+        composable(Route.PERSONAL_INFO_SCREEN) {
+            UserInfoScreen(
+                popBack = { navController.popBackStack() },
+                logout = { navController.navigateAndClearAll(Route.LOGIN_SCREEN) }
+            )
+        }
     }
 }

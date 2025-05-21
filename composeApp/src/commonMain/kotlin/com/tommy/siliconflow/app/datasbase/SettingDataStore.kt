@@ -17,6 +17,7 @@ interface SettingDataStore {
     suspend fun saveApiKey(apiKey: String)
     fun getUserInfo(): Flow<UserInfo?>
     suspend fun saveUserInfo(userInfo: UserInfo)
+    suspend fun removeUserData()
 }
 
 class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : SettingDataStore {
@@ -43,6 +44,13 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
     override suspend fun saveUserInfo(userInfo: UserInfo) {
         dataStore.edit {
             it[userInfoName] = JsonSerializationHelper.jsonX().encodeToString(userInfo)
+        }
+    }
+
+    override suspend fun removeUserData() {
+        dataStore.edit {
+            it.remove(apiKeyName)
+            it.remove(userInfoName)
         }
     }
 }

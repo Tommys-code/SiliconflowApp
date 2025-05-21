@@ -60,4 +60,9 @@ class SiliconFlowRepository(
         }
     }
 
+    suspend fun logout() {
+        settingDataStore.removeUserData()
+        _userInfo.emit(Resource.Loading(false))
+    }
+
 }

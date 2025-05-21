@@ -22,6 +22,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -32,8 +33,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.extensions.formatPriceSimple
 import com.tommy.siliconflow.app.ui.components.ImageItem
+import com.tommy.siliconflow.app.ui.components.LoadingDialog
 import com.tommy.siliconflow.app.ui.components.NormalButton
 import com.tommy.siliconflow.app.ui.theme.CommonColor
 import com.tommy.siliconflow.app.viewmodel.UserInfoViewModel
@@ -58,14 +61,31 @@ import siliconflowapp.composeapp.generated.resources.total_balance
 @Composable
 internal fun UserInfoScreen(
     popBack: () -> Unit,
+    logout: () -> Unit,
     viewModel: UserInfoViewModel = koinViewModel()
 ) {
     val userInfo = viewModel.userInfo.collectAsStateWithLifecycle().value.result
     val apiKey = viewModel.apiKey.collectAsStateWithLifecycle(null).value
+    val showDialog = mutableStateOf(false)
+
     val scope = rememberCoroutineScope()
     val clipboard = LocalClipboardManager.current
 
     val snackBarState = SnackbarHostState()
+
+    scope.launch {
+        viewModel.logoutResult.collect { res ->
+            when (res) {
+                is Resource.Loading -> showDialog.value = true
+                is Resource.Success -> {
+                    logout()
+                    showDialog.value = false
+                }
+
+                else -> showDialog.value = false
+            }
+        }
+    }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -135,24 +155,31 @@ internal fun UserInfoScreen(
                             .background(CommonColor.LightGray)
                             .padding(horizontal = 16.dp),
                 ) {
-                    ColumnItem(stringResource(Res.string.total_balance), formatPriceSimple(it.totalBalance))
+                    ColumnItem(
+                        stringResource(Res.string.total_balance),
+                        formatPriceSimple(it.totalBalance)
+                    )
                     HorizontalDivider(thickness = 0.5.dp)
-                    ColumnItem(stringResource(Res.string.gift_balance), formatPriceSimple(it.balance))
+                    ColumnItem(
+                        stringResource(Res.string.gift_balance),
+                        formatPriceSimple(it.balance)
+                    )
                     HorizontalDivider(thickness = 0.5.dp)
-                    ColumnItem(stringResource(Res.string.charge_balance), formatPriceSimple(it.chargeBalance))
+                    ColumnItem(
+                        stringResource(Res.string.charge_balance),
+                        formatPriceSimple(it.chargeBalance)
+                    )
                 }
             }
             NormalButton(
                 Res.string.logout,
                 modifier = Modifier
-                    .fillMaxWidth().
-                    padding(vertical = 56.dp, horizontal = 24.dp),
-                onClick = {
-
-                }
+                    .fillMaxWidth().padding(vertical = 56.dp, horizontal = 24.dp),
+                onClick = { viewModel.logout() }
             )
         }
     }
+    LoadingDialog(showDialog)
 }
 
 @Composable

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -24,10 +25,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.navigation.Route
+import com.tommy.siliconflow.app.network.error.ApiKeyEmptyException
 import com.tommy.siliconflow.app.network.error.GeneralException
+import com.tommy.siliconflow.app.ui.components.LoadingDialog
 import com.tommy.siliconflow.app.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -48,6 +52,7 @@ internal fun LoginScreen(
     val keyValue = remember { mutableStateOf("") }
     val snackbarHostState = remember { SnackbarHostState() }
     val focusManager = LocalFocusManager.current
+    val showDialog = mutableStateOf(false)
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) {
         Box(
@@ -73,6 +78,7 @@ internal fun LoginScreen(
                         .padding(horizontal = 18.dp, vertical = 10.dp),
                     value = keyValue.value,
                     singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
                     label = { Text(stringResource(Res.string.add_key_hilt)) },
                     onValueChange = {
                         keyValue.value = it
@@ -94,23 +100,30 @@ internal fun LoginScreen(
             }
         }
     }
+    LoadingDialog(showDialog)
 
     loginViewModel.userInfo.collectAsState().value.let {
         when (it) {
             is Resource.Error -> {
+                showDialog.value = false
                 scope.launch {
-                    (it.exception as? GeneralException)?.error?.let { msg ->
-                        snackbarHostState.showSnackbar(msg)
+                    if (it.exception !is ApiKeyEmptyException) {
+                        (it.exception as? GeneralException)?.error?.let { msg ->
+                            snackbarHostState.showSnackbar(msg)
+                        } ?: run {
+                            snackbarHostState.showSnackbar(it.exception.message.orEmpty())
+                        }
                     }
                 }
             }
 
             is Resource.Success -> {
+                showDialog.value = false
                 navigate.invoke(Route.MAIN_SCREEN)
             }
 
             else -> {
-
+                showDialog.value = true
             }
         }
     }

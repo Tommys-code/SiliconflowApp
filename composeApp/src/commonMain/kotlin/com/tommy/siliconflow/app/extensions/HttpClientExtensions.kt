@@ -12,6 +12,7 @@ import io.ktor.http.HttpMethod
 import io.ktor.http.takeFrom
 import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
 const val SSE_DONE = "[DONE]"
@@ -33,7 +34,7 @@ suspend inline fun <reified T> HttpClient.sseChat(
                     .decodeFromString<ChatResponse>(it.data.orEmpty())
                 ChatResult.Progress(data)
             } catch (e: Exception) {
-                throw JsonConvertException("Failed to decode: ${e.message}")
+                ChatResult.Error(e)
             }
         } else {
             ChatResult.Finish

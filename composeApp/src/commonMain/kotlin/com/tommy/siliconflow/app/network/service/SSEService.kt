@@ -14,8 +14,6 @@ class SSEService(private val client: HttpClient) {
         return client.sseChat(
             "/chat/completions",
             chatRequest,
-        ).map {
-            it
-        }
+        )
     }
 }

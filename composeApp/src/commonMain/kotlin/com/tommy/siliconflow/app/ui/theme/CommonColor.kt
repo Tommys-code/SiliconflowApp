@@ -15,4 +15,7 @@ object CommonColor {
 
     @Stable
     val ChatBoxBg = Color(0xFFDDDDDD)
+
+    @Stable
+    val LoadingBg = Color.Black.copy(alpha = 0.6f)
 }

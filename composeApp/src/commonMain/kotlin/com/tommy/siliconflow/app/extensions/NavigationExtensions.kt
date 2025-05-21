@@ -1,6 +1,7 @@
 package com.tommy.siliconflow.app.extensions
 
 import androidx.navigation.NavHostController
+import com.tommy.siliconflow.app.navigation.Route
 
 fun NavHostController.navigateAndPopBackStack(newRoute: String, popRoute: String? = null) {
     navigate(newRoute) {
@@ -8,5 +9,12 @@ fun NavHostController.navigateAndPopBackStack(newRoute: String, popRoute: String
             popUpTo(it) { inclusive = true }
             launchSingleTop = true
         }
+    }
+}
+
+fun NavHostController.navigateAndClearAll(route: String) {
+    navigate(route) {
+        popUpTo(0)
+        launchSingleTop = true
     }
 }

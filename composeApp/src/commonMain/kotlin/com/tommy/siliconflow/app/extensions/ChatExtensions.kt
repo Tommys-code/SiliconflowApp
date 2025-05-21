@@ -31,4 +31,5 @@ fun ChatResult<ChatResponse>.toChatContentResult(): ChatResult<ChatContent>? = w
     ChatResult.Start -> ChatResult.Start
     ChatResult.Finish -> ChatResult.Finish
     is ChatResult.Progress -> this.data.toChatContent()?.let { ChatResult.Progress(it) }
+    is ChatResult.Error -> ChatResult.Error(this.e)
 }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -80,8 +81,10 @@ internal fun ChatView(
                 }
             }
             localAnswer.value.let {
-                if (it is ChatResult.Progress) {
-                    item { Text(it.data.content) }
+                when (it) {
+                    is ChatResult.Progress -> item { Text(it.data.content) }
+                    is ChatResult.Error -> item { Text(it.e.message.orEmpty()) }
+                    else -> {}
                 }
             }
         }

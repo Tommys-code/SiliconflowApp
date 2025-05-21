@@ -39,10 +39,11 @@ class SplashViewModel(private val repository: SiliconFlowRepository) : ViewModel
             repository.userInfo.collectLatest {
                 when (it) {
                     is Resource.Error -> {
-                        when (it.exception) {
-                            ApiKeyEmptyException -> _viewEvent.emit(SplashViewEvent.Navigate(Route.LOGIN_SCREEN))
-                            is AuthException -> _viewEvent.emit(SplashViewEvent.Navigate(Route.LOGIN_SCREEN))
-                        }
+                        _viewEvent.emit(SplashViewEvent.Navigate(Route.LOGIN_SCREEN))
+//                        when (it.exception) {
+//                            ApiKeyEmptyException -> _viewEvent.emit(SplashViewEvent.Navigate(Route.LOGIN_SCREEN))
+//                            is AuthException -> _viewEvent.emit(SplashViewEvent.Navigate(Route.LOGIN_SCREEN))
+//                        }
                     }
 
                     is Resource.Success -> {

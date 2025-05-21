@@ -63,8 +63,18 @@ class ChatRepository(
             }
         }
         _answer.emit(ChatResult.Start)
-        sseService.chatCompletions(ChatRequest(messages = listOf(Message(Role.USER.value, data)))).collect {
-            updateAnswer(it, chatID)
+        chatCompletions(data, chatID)
+    }
+
+    private suspend fun chatCompletions(data: String, chatID: Long) {
+        runCatching {
+            sseService.chatCompletions(
+                ChatRequest(messages = listOf(Message(Role.USER.value, data)))
+            ).collect {
+                updateAnswer(it, chatID)
+            }
+        }.onFailure {
+            _answer.emit(ChatResult.Error(it))
         }
     }
 
