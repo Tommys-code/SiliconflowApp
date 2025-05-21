@@ -30,8 +30,8 @@ interface SessionDao {
     @Query("UPDATE Session SET updateTime = :newTime WHERE id = :sessionId")
     suspend fun updateTime(sessionId: Long, newTime: Long)
 
-    @Query("SELECT * FROM Session ORDER BY updateTime DESC")
-    fun querySessions(): Flow<List<Session>>
+    @Query("SELECT * FROM Session WHERE userID = :userID OR userId = '' ORDER BY updateTime DESC")
+    fun querySessions(userID: String): Flow<List<Session>>
 
     @Query("SELECT * FROM Session WHERE id = :id")
     suspend fun getById(id: Long): Session

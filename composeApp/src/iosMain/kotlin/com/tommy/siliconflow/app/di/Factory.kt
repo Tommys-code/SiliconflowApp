@@ -3,7 +3,7 @@ package com.tommy.siliconflow.app.di
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.room.Room
-import androidx.sqlite.driver.bundled.BundledSQLiteDriver
+import androidx.room.RoomDatabase
 import com.tommy.siliconflow.app.datasbase.AppDatabase
 import com.tommy.siliconflow.app.datasbase.DB_FILE_NAME
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -27,12 +27,11 @@ actual class Factory {
         }
     }
 
-    actual fun createChatDatabase(): AppDatabase {
+    actual fun createDatabaseBuilder(): RoomDatabase.Builder<AppDatabase> {
         val dbFile = "${fileDirectory()}/$DB_FILE_NAME"
         return Room.databaseBuilder<AppDatabase>(
             name = dbFile,
-        ).setDriver(BundledSQLiteDriver())
-            .build()
+        )
     }
 
     @OptIn(ExperimentalForeignApi::class)

@@ -27,7 +27,6 @@ class MainViewState {
 
     private val _selectSessions = MutableStateFlow<List<Session>?>(null)
     val selectSessions: StateFlow<List<Session>?> = _selectSessions
-    val mulSelectionMode: Flow<Boolean> = selectSessions.map { it != null }
 
     fun toggleDrawer(scope: CoroutineScope) {
         multipleSelection(false)

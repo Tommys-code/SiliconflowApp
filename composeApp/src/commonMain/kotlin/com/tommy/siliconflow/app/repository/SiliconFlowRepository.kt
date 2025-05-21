@@ -19,6 +19,8 @@ class SiliconFlowRepository(
     private val _userInfo = MutableStateFlow<Resource<UserInfo>>(Resource.loading)
     val userInfo: StateFlow<Resource<UserInfo>> = _userInfo
 
+    val apikey = settingDataStore.getApiKey()
+
     suspend fun getUserInfo() {
         try {
             _userInfo.emit(Resource.loading)

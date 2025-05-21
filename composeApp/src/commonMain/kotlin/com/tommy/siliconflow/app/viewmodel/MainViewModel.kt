@@ -6,7 +6,6 @@ import androidx.lifecycle.viewModelScope
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.MainViewState
 import com.tommy.siliconflow.app.data.db.Session
-import com.tommy.siliconflow.app.datasbase.SettingDataStore
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.CoroutineScope
@@ -38,8 +37,7 @@ sealed class MainViewEvent {
 }
 
 class MainViewModel(
-    private val settingDataStore: SettingDataStore,
-    private val siliconFlowRepository: SiliconFlowRepository,
+    siliconFlowRepository: SiliconFlowRepository,
     private val chatRepository: ChatRepository,
 ) : ViewModel() {
 

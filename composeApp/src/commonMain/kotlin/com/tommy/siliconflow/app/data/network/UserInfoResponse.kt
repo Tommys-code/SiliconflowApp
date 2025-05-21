@@ -26,9 +26,9 @@ data class UserInfo(
     @SerialName("email")
     val email: String,
     @SerialName("balance")
-    val balance: Float,
+    val balance: Double,
     @SerialName("chargeBalance")
-    val chargeBalance: Float,
+    val chargeBalance: Double,
     @SerialName("totalBalance")
-    val totalBalance: Float,
+    val totalBalance: Double,
 )

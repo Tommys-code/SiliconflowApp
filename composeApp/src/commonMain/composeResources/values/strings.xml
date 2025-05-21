@@ -20,4 +20,13 @@
     <string name="cancel">取消</string>
     <string name="select_all">全选</string>
     <string name="delete_with_num">删除 (%1$d)</string>
+    <string name="personal_info_title">个人信息</string>
+
+    <string name="id">ID</string>
+    <string name="total_balance">总余额</string>
+    <string name="charge_balance">充值余额</string>
+    <string name="gift_balance">赠送余额</string>
+    <string name="copy_success">已复制到剪贴板</string>
+    <string name="api_key">API密钥</string>
+    <string name="logout">退出登录</string>
 </resources>

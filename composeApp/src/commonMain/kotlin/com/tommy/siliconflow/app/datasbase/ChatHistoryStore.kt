@@ -4,19 +4,18 @@ import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
-import com.tommy.siliconflow.app.extensions.receiveHistory
 import com.tommy.siliconflow.app.extensions.sendHistory
 import kotlinx.coroutines.flow.Flow
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 
 interface ChatHistoryStore {
-    fun getSessionList(): Flow<List<Session>>
+    fun getSessionList(useID: String): Flow<List<Session>>
     fun getChatHistory(sessionID: Long): Flow<List<ChatHistory>>
 
     suspend fun updateSession(session: Session): Boolean
     suspend fun deleteSession(session: List<Session>): Boolean
-    suspend fun createSession(title: String): Pair<Session, Long>
+    suspend fun createSession(userID: String, title: String): Pair<Session, Long>
     suspend fun insertSendHistory(sessionID: Long, content: String): Long
     suspend fun updateReceiveHistory(chatID: Long, content: ChatContent)
 }
@@ -24,17 +23,20 @@ interface ChatHistoryStore {
 @OptIn(ExperimentalTime::class)
 class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistoryStore {
 
-    override fun getSessionList(): Flow<List<Session>> {
-        return appDatabase.sessionDao().querySessions()
+    override fun getSessionList(useID: String): Flow<List<Session>> {
+        return appDatabase.sessionDao().querySessions(useID)
     }
 
     override fun getChatHistory(sessionID: Long): Flow<List<ChatHistory>> {
         return appDatabase.chatHistoryDao().getChatByID(sessionID)
     }
 
-    override suspend fun createSession(title: String): Pair<Session, Long> {
+    override suspend fun createSession(userID: String, title: String): Pair<Session, Long> {
         val time = Clock.System.now().toEpochMilliseconds()
-        val session = appDatabase.sessionDao().insertAndGet(Session(title = title, updateTime = time))
+        val session =
+            appDatabase.sessionDao().insertAndGet(
+                Session(title = title, updateTime = time, userID = userID)
+            )
         val chatID = insertHistory(ChatContent(title, Role.USER).sendHistory(session.id, time))
         return session to chatID
     }

@@ -9,6 +9,7 @@ import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.datasbase.ChatHistoryStore
+import com.tommy.siliconflow.app.datasbase.SettingDataStore
 import com.tommy.siliconflow.app.extensions.toChatContentResult
 import com.tommy.siliconflow.app.network.service.SSEService
 import kotlinx.coroutines.CoroutineScope
@@ -20,15 +21,22 @@ import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 
 class ChatRepository(
     private val sseService: SSEService,
     private val chatHistoryStore: ChatHistoryStore,
+    settingDataStore: SettingDataStore,
     scope: CoroutineScope,
 ) {
 
-    val sessionList = chatHistoryStore.getSessionList()
+    private val useID = settingDataStore.getUserInfo().map { it?.id }
+
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val sessionList: Flow<List<Session>> = useID.flatMapLatest { id ->
+        id?.let { chatHistoryStore.getSessionList(it) } ?: flowOf()
+    }
 
     private val _currentSession = MutableStateFlow<Session?>(null)
     val currentSession: StateFlow<Session?> = _currentSession
@@ -49,7 +57,7 @@ class ChatRepository(
         val chatID: Long = currentSession.value?.let {
             chatHistoryStore.insertSendHistory(it.id, data)
         } ?: run {
-            chatHistoryStore.createSession(data).let {
+            chatHistoryStore.createSession(useID.conflate().first().orEmpty(), data).let {
                 _currentSession.value = it.first
                 it.second
             }

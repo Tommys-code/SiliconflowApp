@@ -52,6 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.data.network.UserInfo
+import com.tommy.siliconflow.app.navigation.Route
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.NormalButton
 import com.tommy.siliconflow.app.ui.theme.CommonColor
@@ -214,11 +215,21 @@ private fun DrawerBottom(
         if (mulSelectionMode) {
             MulSelectionBottom(allSelected, selectSessions, doEvent)
         } else {
-            ImageItem(
-                userInfo?.image,
-                modifier = Modifier.padding(end = 8.dp).size(36.dp).clip(CircleShape)
-            )
-            Text(userInfo?.name.orEmpty(), Modifier.weight(1f))
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.fillMaxHeight()
+                    .clickable { doEvent.invoke(MainViewEvent.Navigate(Route.PERSONAL_INFO_SCREEN)) }
+            ) {
+                ImageItem(
+                    userInfo?.image,
+                    modifier = Modifier
+                        .padding(end = 8.dp).size(36.dp).clip(CircleShape)
+                )
+                Text(
+                    userInfo?.name.orEmpty(),
+                )
+            }
+            Spacer(modifier = Modifier.weight(1f))
             Icon(
                 painter = painterResource(Res.drawable.ic_settings),
                 contentDescription = "setting",
