@@ -1,7 +1,7 @@
 package com.tommy.siliconflow.app.extensions
 
-import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.ChatResult
+import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.network.JsonSerializationHelper
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.sse.ClientSSESession
@@ -10,9 +10,7 @@ import io.ktor.client.plugins.sse.sse
 import io.ktor.client.request.setBody
 import io.ktor.http.HttpMethod
 import io.ktor.http.takeFrom
-import io.ktor.serialization.JsonConvertException
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
 const val SSE_DONE = "[DONE]"

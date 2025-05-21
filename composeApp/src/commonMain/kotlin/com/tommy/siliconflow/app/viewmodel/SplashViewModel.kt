@@ -4,8 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.navigation.Route
-import com.tommy.siliconflow.app.network.error.ApiKeyEmptyException
-import com.tommy.siliconflow.app.network.error.AuthException
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll

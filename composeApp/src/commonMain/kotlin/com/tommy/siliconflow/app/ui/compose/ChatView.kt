@@ -9,13 +9,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -44,7 +42,6 @@ internal fun ChatView(
 ) {
     val ques = remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
-    val listState = rememberLazyListState()
 
     val localAnswer = viewModel.answer.collectAsStateWithLifecycle()
     val chatHistory = viewModel.chatHistory.collectAsStateWithLifecycle(emptyList())
@@ -52,9 +49,19 @@ internal fun ChatView(
     Column(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 16.dp),
-            state = listState
+            reverseLayout = true,
         ) {
+            localAnswer.value.let {
+                when (it) {
+                    is ChatResult.Progress -> item { ReceiveText(it.data.content) }
+                    is ChatResult.Error -> item { ReceiveText(it.e.message.orEmpty()) }
+                    else -> {}
+                }
+            }
             items(chatHistory.value) { chat ->
+                chat.receive?.let {
+                    ReceiveText(it.content)
+                }
                 chat.send?.let {
                     Box(
                         modifier = Modifier.fillMaxWidth(),
@@ -75,16 +82,6 @@ internal fun ChatView(
                             style = MaterialTheme.typography.bodyLarge,
                         )
                     }
-                }
-                chat.receive?.let {
-                    Text(it.content)
-                }
-            }
-            localAnswer.value.let {
-                when (it) {
-                    is ChatResult.Progress -> item { Text(it.data.content) }
-                    is ChatResult.Error -> item { Text(it.e.message.orEmpty()) }
-                    else -> {}
                 }
             }
         }
@@ -115,4 +112,9 @@ internal fun ChatView(
             )
         }
     }
+}
+
+@Composable
+private fun ReceiveText(content: String) {
+    Text(content, modifier = Modifier.padding(bottom = 20.dp))
 }

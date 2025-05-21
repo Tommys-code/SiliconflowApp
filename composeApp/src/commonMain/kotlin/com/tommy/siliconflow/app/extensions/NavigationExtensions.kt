@@ -1,7 +1,6 @@
 package com.tommy.siliconflow.app.extensions
 
 import androidx.navigation.NavHostController
-import com.tommy.siliconflow.app.navigation.Route
 
 fun NavHostController.navigateAndPopBackStack(newRoute: String, popRoute: String? = null) {
     navigate(newRoute) {
