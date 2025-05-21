@@ -60,7 +60,9 @@ internal fun SessionPopup(
                 PopupItem(Res.string.edit_session_name, doEvent) {
                     doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.EditSessionName(state.session)))
                 }
-                PopupItem(Res.string.delete, doEvent)
+                PopupItem(Res.string.delete, doEvent) {
+                    doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.DeleteSession(state.session)))
+                }
             }
         }
     }

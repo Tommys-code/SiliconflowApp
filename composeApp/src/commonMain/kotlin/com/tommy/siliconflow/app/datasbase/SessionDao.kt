@@ -1,6 +1,7 @@
 package com.tommy.siliconflow.app.datasbase
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
@@ -22,6 +23,9 @@ interface SessionDao {
 
     @Update
     suspend fun updateSession(session: Session): Int
+
+    @Delete
+    suspend fun deleteSession(session: Session): Int
 
     @Query("UPDATE Session SET updateTime = :newTime WHERE id = :sessionId")
     suspend fun updateTime(sessionId: Long, newTime: Long)

@@ -15,6 +15,7 @@ interface ChatHistoryStore {
     fun getChatHistory(sessionID: Long): Flow<List<ChatHistory>>
 
     suspend fun updateSession(session: Session): Boolean
+    suspend fun deleteSession(session: Session): Boolean
     suspend fun createSession(title: String): Session
     suspend fun insertSendHistory(sessionID: Long, content: String)
     suspend fun insertReceiveHistory(sessionID: Long, content: ChatContent)
@@ -55,5 +56,9 @@ class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistorySt
 
     private suspend fun insertHistory(history: ChatHistory) {
         appDatabase.chatHistoryDao().insert(history)
+    }
+
+    override suspend fun deleteSession(session: Session): Boolean {
+        return appDatabase.sessionDao().deleteSession(session) > 0
     }
 }

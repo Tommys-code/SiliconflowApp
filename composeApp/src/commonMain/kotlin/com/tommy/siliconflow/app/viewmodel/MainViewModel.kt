@@ -15,6 +15,8 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.delete_session_error
+import siliconflowapp.composeapp.generated.resources.delete_session_success
 import siliconflowapp.composeapp.generated.resources.edit_session_name_error
 import siliconflowapp.composeapp.generated.resources.edit_session_name_success
 
@@ -28,6 +30,7 @@ sealed class MainViewEvent {
     data object DismissPopup : MainViewEvent()
     data class ShowOrHideDialog(val dialog: MainDialog?) : MainViewEvent()
     data class EditSessionName(val session: Session) : MainViewEvent()
+    data class DeleteSession(val session: Session) : MainViewEvent()
 }
 
 class MainViewModel(
@@ -62,6 +65,15 @@ class MainViewModel(
                             Res.string.edit_session_name_success
                         } else {
                             Res.string.edit_session_name_error
+                        }
+                        doEvent(MainViewEvent.ShowToast(msgRes = res))
+                    }
+
+                    is MainViewEvent.DeleteSession -> {
+                        val res = if (chatRepository.deleteSession(it.session)) {
+                            Res.string.delete_session_success
+                        } else {
+                            Res.string.delete_session_error
                         }
                         doEvent(MainViewEvent.ShowToast(msgRes = res))
                     }

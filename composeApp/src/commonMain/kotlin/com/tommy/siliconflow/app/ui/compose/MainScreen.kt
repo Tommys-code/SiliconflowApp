@@ -3,6 +3,7 @@ package com.tommy.siliconflow.app.ui.compose
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
@@ -27,7 +28,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.ui.components.ImageItem
+import com.tommy.siliconflow.app.ui.components.Toast
 import com.tommy.siliconflow.app.ui.dialog.MainViewDialog
 import com.tommy.siliconflow.app.ui.dialog.SessionPopup
 import com.tommy.siliconflow.app.ui.theme.CommonColor
@@ -75,24 +76,26 @@ internal fun MainScreen(
     onNavigate: (route: String) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    val snackBarHostState = remember { SnackbarHostState() }
-    ModalNavigationDrawer(
-        drawerContent = { DrawerContent(viewModel) { viewModel.doEvent(it) } },
-        drawerState = viewModel.mainViewState.drawerState,
-    ) {
-        Scaffold(
-            modifier = Modifier.fillMaxSize(),
-            snackbarHost = { SnackbarHost(snackBarHostState) },
-            topBar = {
-                HomeTopAppBar { viewModel.doEvent(it) }
-            },
-        ) { innerPadding ->
-            ChatView(modifier = Modifier.padding(innerPadding), viewModel)
+    val hostState = SnackbarHostState()
+    Box {
+        ModalNavigationDrawer(
+            drawerContent = { DrawerContent(viewModel) { viewModel.doEvent(it) } },
+            drawerState = viewModel.mainViewState.drawerState,
+        ) {
+            Scaffold(
+                modifier = Modifier.fillMaxSize(),
+                topBar = {
+                    HomeTopAppBar { viewModel.doEvent(it) }
+                },
+            ) { innerPadding ->
+                ChatView(modifier = Modifier.padding(innerPadding), viewModel)
+            }
         }
+        // popup
+        SessionPopup(viewModel.mainViewState.popupState) { viewModel.doEvent(it) }
+        MainViewDialog(viewModel.mainViewState.dialogState) { viewModel.doEvent(it) }
+        Toast(hostState, modifier = Modifier.align(Alignment.Center))
     }
-    // popup
-    SessionPopup(viewModel.mainViewState.popupState) { viewModel.doEvent(it) }
-    MainViewDialog(viewModel.mainViewState.dialogState) { viewModel.doEvent(it) }
     coroutineScope.launch {
         viewModel.viewEvent.collect {
             when (it) {
@@ -100,7 +103,7 @@ internal fun MainScreen(
                 is MainViewEvent.ShowToast -> it.msg ?: it.msgRes?.let { res ->
                     getString(res)
                 }?.let { msg ->
-                    snackBarHostState.showSnackbar(msg)
+                    hostState.showSnackbar(msg)
                 }
 
                 else -> {}
@@ -212,7 +215,7 @@ internal fun ColumnScope.DrawerCenterList(
                             boxRect = it.boundsInWindow()
                         }
                     }
-                    .pointerInput(Unit) {
+                    .pointerInput(key1 = data.title) {
                         detectTapGestures(
                             onLongPress = { offset ->
                                 val windowOffset = IntOffset(

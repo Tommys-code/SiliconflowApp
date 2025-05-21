@@ -82,4 +82,8 @@ class ChatRepository(
     suspend fun changeSessionName(session: Session): Boolean {
         return chatHistoryStore.updateSession(session)
     }
+
+    suspend fun deleteSession(session: Session): Boolean {
+        return chatHistoryStore.deleteSession(session)
+    }
 }
