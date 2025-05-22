@@ -10,10 +10,12 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
 import com.tommy.siliconflow.app.ui.components.Toast
 import com.tommy.siliconflow.app.ui.dialog.MainViewDialog
 import com.tommy.siliconflow.app.ui.dialog.SessionPopup
