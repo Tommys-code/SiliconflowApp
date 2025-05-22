@@ -21,8 +21,10 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
+import androidx.compose.ui.window.PopupProperties
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.SessionPopupState
+import com.tommy.siliconflow.app.extensions.popupPosition
 import com.tommy.siliconflow.app.viewmodel.MainViewEvent
 import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.compose.resources.StringResource
@@ -41,6 +43,7 @@ internal fun SessionPopup(
     if (state != null) {
         Popup(
             onDismissRequest = { doEvent.invoke(MainViewEvent.DismissPopup) },
+            properties = PopupProperties(focusable = true),
             popupPositionProvider = object : PopupPositionProvider {
                 override fun calculatePosition(
                     anchorBounds: IntRect,
@@ -48,7 +51,7 @@ internal fun SessionPopup(
                     layoutDirection: LayoutDirection,
                     popupContentSize: IntSize
                 ): IntOffset {
-                    return IntOffset(state.offset.x, state.offset.y)
+                    return state.offset.popupPosition(windowSize, popupContentSize)
                 }
             }
         ) {
@@ -62,7 +65,10 @@ internal fun SessionPopup(
                 PopupItem(Res.string.mul_select, doEvent) {
                     doEvent.invoke(MainViewEvent.MultipleSelectionMode(true))
                 }
-                HorizontalDivider(thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 10.dp))
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    modifier = Modifier.padding(horizontal = 10.dp)
+                )
                 PopupItem(Res.string.edit_session_name, doEvent) {
                     doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.EditSessionName(state.session)))
                 }

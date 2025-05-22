@@ -107,4 +107,8 @@ class ChatRepository(
     suspend fun deleteSession(session: List<Session>): Boolean {
         return chatHistoryStore.deleteSession(session)
     }
+
+    suspend fun deleteChatHistory(chatHistory: ChatHistory): Boolean {
+        return chatHistoryStore.deleteChatHistory(chatHistory)
+    }
 }

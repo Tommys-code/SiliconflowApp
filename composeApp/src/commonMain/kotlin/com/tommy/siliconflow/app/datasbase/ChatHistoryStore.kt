@@ -18,6 +18,7 @@ interface ChatHistoryStore {
     suspend fun createSession(userID: String, title: String): Pair<Session, Long>
     suspend fun insertSendHistory(sessionID: Long, content: String): Long
     suspend fun updateReceiveHistory(chatID: Long, content: ChatContent)
+    suspend fun deleteChatHistory(chatHistory: ChatHistory): Boolean
 }
 
 @OptIn(ExperimentalTime::class)
@@ -44,14 +45,14 @@ class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistorySt
     override suspend fun insertSendHistory(sessionID: Long, content: String): Long {
         val time = Clock.System.now().toEpochMilliseconds()
         val id =
-            appDatabase.chatHistoryDao().insert(ChatContent(content, Role.USER).sendHistory(sessionID, time))
+            appDatabase.chatHistoryDao()
+                .insert(ChatContent(content, Role.USER).sendHistory(sessionID, time))
         appDatabase.sessionDao().updateTime(sessionID, time)
         return id
     }
 
     override suspend fun updateReceiveHistory(chatID: Long, content: ChatContent) {
         appDatabase.chatHistoryDao().updateReceive(chatID, content.content, content.role)
-//            .insert(content.receiveHistory(sessionID, Clock.System.now().toEpochMilliseconds()))
     }
 
     override suspend fun updateSession(session: Session): Boolean {
@@ -64,5 +65,13 @@ class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistorySt
 
     override suspend fun deleteSession(session: List<Session>): Boolean {
         return appDatabase.sessionDao().deleteSession(session) > 0
+    }
+
+    override suspend fun deleteChatHistory(chatHistory: ChatHistory): Boolean {
+        val success = appDatabase.chatHistoryDao().deleteChatHistory(chatHistory) > 0
+        if (appDatabase.chatHistoryDao().checkSessionChatExists(chatHistory.sessionId) == 0) {
+            appDatabase.sessionDao().deleteById(chatHistory.sessionId)
+        }
+        return success
     }
 }

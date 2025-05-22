@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.MainViewState
+import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
@@ -15,8 +16,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import siliconflowapp.composeapp.generated.resources.Res
-import siliconflowapp.composeapp.generated.resources.delete_session_error
-import siliconflowapp.composeapp.generated.resources.delete_session_success
+import siliconflowapp.composeapp.generated.resources.delete_error
+import siliconflowapp.composeapp.generated.resources.delete_success
 import siliconflowapp.composeapp.generated.resources.edit_session_name_error
 import siliconflowapp.composeapp.generated.resources.edit_session_name_success
 
@@ -34,6 +35,7 @@ sealed class MainViewEvent {
     data class MultipleSelectionMode(val open: Boolean) : MainViewEvent()
     data class SessionCheck(val session: Session) : MainViewEvent()
     data object CheckAll : MainViewEvent()
+    data class DeleteChatHistory(val history: ChatHistory) : MainViewEvent()
 }
 
 class MainViewModel(
@@ -73,9 +75,9 @@ class MainViewModel(
 
                     is MainViewEvent.DeleteSession -> {
                         val res = if (chatRepository.deleteSession(it.session)) {
-                            Res.string.delete_session_success
+                            Res.string.delete_success
                         } else {
-                            Res.string.delete_session_error
+                            Res.string.delete_error
                         }
                         doEvent(MainViewEvent.ShowToast(msgRes = res))
                     }
@@ -83,6 +85,14 @@ class MainViewModel(
                     is MainViewEvent.MultipleSelectionMode -> mainViewState.multipleSelection(it.open)
                     is MainViewEvent.SessionCheck -> mainViewState.sessionCheck(it.session)
                     MainViewEvent.CheckAll -> mainViewState.checkAll(sessionList.first())
+                    is MainViewEvent.DeleteChatHistory -> {
+                        val res = if (chatRepository.deleteChatHistory(it.history)) {
+                            Res.string.delete_success
+                        } else {
+                            Res.string.delete_error
+                        }
+                        doEvent(MainViewEvent.ShowToast(msgRes = res))
+                    }
                     else -> {}
                 }
             }

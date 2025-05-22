@@ -12,8 +12,8 @@
     <string name="edit_session_name_error">修改失败</string>
     <string name="delete_dialog_title">确认删除</string>
     <string name="delete_session_tips">该内容删除后无法恢复</string>
-    <string name="delete_session_success">删除成功</string>
-    <string name="delete_session_error">删除失败</string>
+    <string name="delete_success">删除成功</string>
+    <string name="delete_error">删除失败</string>
     <string name="mul_select">多选</string>
     <string name="delete">删除</string>
     <string name="finish">完成</string>
@@ -29,4 +29,6 @@
     <string name="copy_success">已复制到剪贴板</string>
     <string name="api_key">API密钥</string>
     <string name="logout">退出登录</string>
+    <string name="copy">复制</string>
+    <string name="delete_chat_tips">该操作会同时删除提问和回答，且内容删除后无法恢复</string>
 </resources>

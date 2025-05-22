@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.ui.compose
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,17 +19,30 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tommy.siliconflow.app.data.ChatResult
+import com.tommy.siliconflow.app.data.db.ChatHistory
+import com.tommy.siliconflow.app.ui.dialog.ChatPopup
+import com.tommy.siliconflow.app.ui.dialog.ChatPopupState
+import com.tommy.siliconflow.app.ui.dialog.ChatType
 import com.tommy.siliconflow.app.ui.theme.CommonColor
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -42,6 +56,7 @@ internal fun ChatView(
 ) {
     val ques = remember { mutableStateOf("") }
     val focusManager = LocalFocusManager.current
+    val popupState = remember { mutableStateOf<ChatPopupState?>(null) }
 
     val localAnswer = viewModel.answer.collectAsStateWithLifecycle()
     val chatHistory = viewModel.chatHistory.collectAsStateWithLifecycle(emptyList())
@@ -59,30 +74,7 @@ internal fun ChatView(
                 }
             }
             items(chatHistory.value) { chat ->
-                chat.receive?.let {
-                    ReceiveText(it.content)
-                }
-                chat.send?.let {
-                    Box(
-                        modifier = Modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.CenterEnd,
-                    ) {
-                        Text(
-                            it.content,
-                            modifier = Modifier
-                                .clip(
-                                    RoundedCornerShape(
-                                        topStart = 12.dp,
-                                        topEnd = 12.dp,
-                                        bottomStart = 12.dp,
-                                    )
-                                )
-                                .background(CommonColor.ChatBoxBg)
-                                .padding(horizontal = 20.dp, vertical = 8.dp),
-                            style = MaterialTheme.typography.bodyLarge,
-                        )
-                    }
-                }
+                ChatBox(chat, popupState)
             }
         }
         Card(
@@ -112,9 +104,71 @@ internal fun ChatView(
             )
         }
     }
+    ChatPopup(popupState, viewModel::doEvent)
 }
 
 @Composable
-private fun ReceiveText(content: String) {
-    Text(content, modifier = Modifier.padding(bottom = 20.dp))
+private fun ReceiveText(content: String, modifier: Modifier = Modifier) {
+    Text(content, modifier = modifier.padding(bottom = 10.dp))
+}
+
+@Composable
+private fun ChatBox(chat: ChatHistory, popupState: MutableState<ChatPopupState?>) {
+    chat.receive?.let {
+        var receiveCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+        ReceiveText(
+            it.content,
+            Modifier
+                .onGloballyPositioned { cor -> receiveCoordinates = cor }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = { offset ->
+                            popupState.value = ChatPopupState(
+                                offset = receiveCoordinates?.localToWindow(offset)?.round()
+                                    ?: IntOffset(0, 0),
+                                history = chat,
+                                type = ChatType.RECEIVER,
+                            )
+                        }
+                    )
+                }
+        )
+    }
+    chat.send?.let {
+        var sendCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .onGloballyPositioned { cor -> sendCoordinates = cor }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = { offset ->
+                            popupState.value = ChatPopupState(
+                                offset = sendCoordinates?.localToWindow(offset)?.round()
+                                    ?: IntOffset(0, 0),
+                                history = chat,
+                                type = ChatType.SEND,
+                            )
+                        }
+                    )
+                },
+            contentAlignment = Alignment.CenterEnd,
+        ) {
+            Text(
+                it.content,
+                modifier = Modifier
+                    .padding(bottom = 10.dp)
+                    .clip(
+                        RoundedCornerShape(
+                            topStart = 12.dp,
+                            topEnd = 12.dp,
+                            bottomStart = 12.dp,
+                        )
+                    )
+                    .background(CommonColor.ChatBoxBg)
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
+                style = MaterialTheme.typography.bodyLarge,
+            )
+        }
+    }
 }

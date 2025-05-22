@@ -33,7 +33,7 @@ fun Toast(
             Text(
                 text = it.visuals.message,
                 modifier = Modifier.align(Alignment.CenterHorizontally)
-                    .padding(vertical = 20.dp)
+                    .padding(vertical = 20.dp, horizontal = 16.dp),
             )
         }
     }

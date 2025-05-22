@@ -1,6 +1,7 @@
 package com.tommy.siliconflow.app.datasbase
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -22,5 +23,11 @@ interface ChatHistoryDao {
     fun getChatByID(sessionId: Long): Flow<List<ChatHistory>>
 
     @Query("UPDATE ChatHistory SET receive_content = :newContent,receive_role = :newRole WHERE id = :id")
-    suspend fun updateReceive(id: Long, newContent: String?,newRole: Role)
+    suspend fun updateReceive(id: Long, newContent: String?, newRole: Role)
+
+    @Delete
+    suspend fun deleteChatHistory(chatHistory: ChatHistory): Int
+
+    @Query("SELECT COUNT(*) FROM ChatHistory WHERE sessionId = :sessionId")
+    suspend fun checkSessionChatExists(sessionId: Long): Int
 }

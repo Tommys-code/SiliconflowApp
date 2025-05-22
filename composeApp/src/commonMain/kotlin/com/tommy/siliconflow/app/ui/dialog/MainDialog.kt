@@ -13,8 +13,10 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.tommy.siliconflow.app.data.MainDialog
+import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.ui.components.CommonDialog
 import com.tommy.siliconflow.app.ui.components.NormalButton
@@ -23,6 +25,8 @@ import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.compose.resources.stringResource
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.cancel
+import siliconflowapp.composeapp.generated.resources.confirm
+import siliconflowapp.composeapp.generated.resources.delete_chat_tips
 import siliconflowapp.composeapp.generated.resources.delete_dialog_title
 import siliconflowapp.composeapp.generated.resources.delete_session_tips
 import siliconflowapp.composeapp.generated.resources.edit_session_name
@@ -39,6 +43,7 @@ internal fun MainViewDialog(
             is MainDialog.EditSessionName -> EditSessionNameDialog(it.session, doEvent)
             is MainDialog.DeleteSession -> DeleteSessionDialog(listOf(it.session), doEvent)
             is MainDialog.DeleteSessions -> DeleteSessionDialog(it.sessions, doEvent)
+            is MainDialog.DeleteChatHistory -> DeleteChatHistoryDialog(it.history, doEvent)
         }
     }
 }
@@ -111,13 +116,46 @@ private fun DeleteSessionDialog(
         )
         NormalButton(
             modifier = Modifier.weight(1f),
-            res = Res.string.finish,
+            res = Res.string.confirm,
             color = ButtonDefaults.buttonColors(
                 containerColor = Color.Red
             ),
             textColor = Color.White,
             onClick = {
                 doEvent.invoke(MainViewEvent.DeleteSession(session))
+                doEvent.invoke(MainViewEvent.ShowOrHideDialog(null))
+            },
+        )
+    }
+}
+
+@Composable
+private fun DeleteChatHistoryDialog(
+    history: ChatHistory,
+    doEvent: (MainViewEvent) -> Unit,
+) {
+    CommonDialog(
+        title = stringResource(Res.string.delete_dialog_title),
+        content = {
+            Text(stringResource(Res.string.delete_chat_tips), textAlign = TextAlign.Center)
+        }
+    ) {
+        NormalButton(
+            modifier = Modifier.weight(1f),
+            res = Res.string.cancel,
+            onClick = {
+                doEvent.invoke(MainViewEvent.ShowOrHideDialog(null))
+            },
+        )
+        NormalButton(
+            modifier = Modifier.weight(1f),
+            res = Res.string.confirm,
+            color = ButtonDefaults.buttonColors(
+                containerColor = Color.Red
+            ),
+            textColor = Color.White,
+            onClick = {
+                doEvent.invoke(MainViewEvent.DeleteChatHistory(history))
                 doEvent.invoke(MainViewEvent.ShowOrHideDialog(null))
             },
         )

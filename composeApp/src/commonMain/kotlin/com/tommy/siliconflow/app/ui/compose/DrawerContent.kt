@@ -39,14 +39,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.MainDialog
@@ -111,7 +111,6 @@ private fun ColumnScope.DrawerCenterList(
     selectSessions: List<Session>?,
     doEvent: (MainViewEvent) -> Unit,
 ) {
-    var boxRect by remember { mutableStateOf(Rect.Zero) }
     val coroutineScope = rememberCoroutineScope()
     LazyColumn(modifier = Modifier.weight(1f)) {
         item {
@@ -145,6 +144,7 @@ private fun ColumnScope.DrawerCenterList(
             )
         }
         itemsIndexed(sessionList) { index, data ->
+            var itemCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
             val background = if (currentSession == data) {
                 CommonColor.LightGray
             } else if (popupSession == data) {
@@ -156,18 +156,12 @@ private fun ColumnScope.DrawerCenterList(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 6.dp)
-                    .onGloballyPositioned {
-                        if (index == 0) {
-                            boxRect = it.boundsInWindow()
-                        }
-                    }
+                    .onGloballyPositioned { itemCoordinates = it }
                     .pointerInput(key1 = data.title) {
                         detectTapGestures(
                             onLongPress = { offset ->
-                                val windowOffset = IntOffset(
-                                    (boxRect.left + offset.x).toInt(),
-                                    (boxRect.top + index * boxRect.height + offset.y).toInt()
-                                )
+                                val windowOffset = itemCoordinates?.localToWindow(offset)?.round()
+                                    ?: IntOffset(0, 0)
                                 doEvent(MainViewEvent.ShowPopup(data, windowOffset))
                             },
                             onTap = { _ ->
@@ -289,7 +283,15 @@ private fun RowScope.MulSelectionBottom(
         enable = size > 0,
         textColor = Color.White,
         onClick = {
-            selectSessions?.let { doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.DeleteSessions(it))) }
+            selectSessions?.let {
+                doEvent.invoke(
+                    MainViewEvent.ShowOrHideDialog(
+                        MainDialog.DeleteSessions(
+                            it
+                        )
+                    )
+                )
+            }
         },
     )
 }

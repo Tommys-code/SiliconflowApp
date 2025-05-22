@@ -4,6 +4,7 @@ import androidx.compose.material3.DrawerState
 import androidx.compose.material3.DrawerValue
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.unit.IntOffset
+import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Session
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -86,4 +87,5 @@ sealed class MainDialog {
     class EditSessionName(val session: Session) : MainDialog()
     class DeleteSession(val session: Session) : MainDialog()
     class DeleteSessions(val sessions: List<Session>) : MainDialog()
+    class DeleteChatHistory(val history: ChatHistory) : MainDialog()
 }

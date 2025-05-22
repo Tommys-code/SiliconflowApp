@@ -36,4 +36,6 @@ interface SessionDao {
     @Query("SELECT * FROM Session WHERE id = :id")
     suspend fun getById(id: Long): Session
 
+    @Query("DELETE FROM Session WHERE id = :id")
+    suspend fun deleteById(id: Long): Int
 }
