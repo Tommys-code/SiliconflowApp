@@ -21,5 +21,5 @@ data class ChoiceDelta(
     val content: String?,
     @SerialName("reasoning_content")
     val reasoningContent: String?,
-    val role: String,
+    val role: String?,
 )

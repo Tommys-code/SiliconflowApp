@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.extensions.formatPriceSimple
+import com.tommy.siliconflow.app.ui.components.CustomTopBar
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.LoadingDialog
 import com.tommy.siliconflow.app.ui.components.NormalButton
@@ -57,7 +58,6 @@ import siliconflowapp.composeapp.generated.resources.logout
 import siliconflowapp.composeapp.generated.resources.personal_info_title
 import siliconflowapp.composeapp.generated.resources.total_balance
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun UserInfoScreen(
     popBack: () -> Unit,
@@ -76,7 +76,7 @@ internal fun UserInfoScreen(
     scope.launch {
         viewModel.logoutResult.collect { res ->
             when (res) {
-                is Resource.Loading -> showDialog.value = true
+                is Resource.Loading -> showDialog.value = res.loading
                 is Resource.Success -> {
                     logout()
                     showDialog.value = false
@@ -91,16 +91,10 @@ internal fun UserInfoScreen(
         modifier = Modifier.fillMaxSize(),
         snackbarHost = { SnackbarHost(snackBarState) },
         topBar = {
-            CenterAlignedTopAppBar(title = {
-                Text(stringResource(Res.string.personal_info_title))
-            }, navigationIcon = {
-                IconButton(onClick = popBack) {
-                    Icon(
-                        painter = painterResource(Res.drawable.ic_back),
-                        contentDescription = "drawer",
-                    )
-                }
-            })
+            CustomTopBar(
+                title = stringResource(Res.string.personal_info_title),
+                popBack = popBack,
+            )
         }
     ) { innerPadding ->
         Column(

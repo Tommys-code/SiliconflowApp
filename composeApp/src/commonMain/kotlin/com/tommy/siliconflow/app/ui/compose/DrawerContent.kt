@@ -212,7 +212,9 @@ private fun DrawerBottom(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxHeight()
-                    .clickable { doEvent.invoke(MainViewEvent.Navigate(Route.PERSONAL_INFO_SCREEN)) }
+                    .clickable {
+                        doEvent.invoke(MainViewEvent.Navigate(Route.PERSONAL_INFO_SCREEN))
+                    }
             ) {
                 ImageItem(
                     userInfo?.image,

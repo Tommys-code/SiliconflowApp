@@ -1,6 +1,5 @@
 package com.tommy.siliconflow.app.repository
 
-import com.tommy.siliconflow.app.data.network.ChatRequest
 import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.ChatResult
 import com.tommy.siliconflow.app.data.network.Message
@@ -68,8 +67,8 @@ class ChatRepository(
 
     private suspend fun chatCompletions(data: String, chatID: Long) {
         runCatching {
-            sseService.chatCompletions(
-                ChatRequest(messages = listOf(Message(Role.USER.value, data)))
+            sseService.chat(
+                listOf(Message(Role.USER.value, data))
             ).collect {
                 updateAnswer(it, chatID)
             }

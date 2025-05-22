@@ -38,11 +38,13 @@ data class ChatContent(
 enum class Role(val value: String) {
     SYSTEM("system"),
     USER("user"),
-    ASSISTANT("assistant");
+    ASSISTANT("assistant"),
+    UNKNOWN("unknown");
 
     companion object {
-        fun valueOfIgnoreCase(name: String): Role {
-            return enumValues<Role>().first { it.name.equals(name, ignoreCase = true) }
+        fun valueOfIgnoreCase(name: String?): Role {
+            return enumValues<Role>().firstOrNull { it.name.equals(name, ignoreCase = true) }
+                ?: UNKNOWN
         }
     }
 }

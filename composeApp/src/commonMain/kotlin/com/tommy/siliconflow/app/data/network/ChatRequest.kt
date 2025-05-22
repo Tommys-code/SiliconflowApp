@@ -5,11 +5,11 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ChatRequest(
-    val model: String = "Qwen/Qwen3-8B",
+    val model: String,
     val messages: List<Message>,
     val stream: Boolean = true,
     @SerialName("max_tokens")
-    val maxTokens: Int = 8192,
+    val maxTokens: Int,
 )
 
 @Serializable

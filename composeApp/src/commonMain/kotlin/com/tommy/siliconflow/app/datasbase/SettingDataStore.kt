@@ -11,6 +11,9 @@ import kotlinx.coroutines.flow.map
 
 private const val API_KEY_NAME = "api_key"
 private const val USER_INFO_NAME = "user_info"
+private const val CHOOSE_MODEL_NAME = "choose_model"
+
+private const val DEFAULT_MODEL = "Qwen/Qwen3-8B"
 
 interface SettingDataStore {
     fun getApiKey(): Flow<String?>
@@ -18,12 +21,15 @@ interface SettingDataStore {
     fun getUserInfo(): Flow<UserInfo?>
     suspend fun saveUserInfo(userInfo: UserInfo)
     suspend fun removeUserData()
+    fun getCurrentModel(): Flow<String?>
+    suspend fun chooseModel(model: String)
 }
 
 class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : SettingDataStore {
 
     private val apiKeyName = stringPreferencesKey(API_KEY_NAME)
     private val userInfoName = stringPreferencesKey(USER_INFO_NAME)
+    private val aiModelName = stringPreferencesKey(CHOOSE_MODEL_NAME)
 
     override fun getApiKey(): Flow<String?> {
         return dataStore.data.map { it[apiKeyName] }
@@ -52,5 +58,13 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
             it.remove(apiKeyName)
             it.remove(userInfoName)
         }
+    }
+
+    override fun getCurrentModel(): Flow<String> {
+        return dataStore.data.map { it[aiModelName] ?: DEFAULT_MODEL }
+    }
+
+    override suspend fun chooseModel(model: String) {
+        dataStore.edit { it[aiModelName] = model }
     }
 }

@@ -7,6 +7,7 @@ import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.MainViewState
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.datasbase.ModelStore
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.CoroutineScope
@@ -41,6 +42,7 @@ sealed class MainViewEvent {
 class MainViewModel(
     siliconFlowRepository: SiliconFlowRepository,
     private val chatRepository: ChatRepository,
+    modelStore: ModelStore,
 ) : ViewModel() {
 
     val userInfo = siliconFlowRepository.userInfo
@@ -54,6 +56,7 @@ class MainViewModel(
     val currentSession = chatRepository.currentSession
     val chatHistory = chatRepository.chatHistory
     val answer = chatRepository.answer
+    val currentModel = modelStore.currentModel
 
     init {
         viewModelScope.launch {
@@ -93,6 +96,7 @@ class MainViewModel(
                         }
                         doEvent(MainViewEvent.ShowToast(msgRes = res))
                     }
+
                     else -> {}
                 }
             }
