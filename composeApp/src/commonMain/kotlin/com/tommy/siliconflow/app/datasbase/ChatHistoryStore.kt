@@ -17,7 +17,7 @@ interface ChatHistoryStore {
     suspend fun deleteSession(session: List<Session>): Boolean
     suspend fun createSession(userID: String, title: String): Pair<Session, Long>
     suspend fun insertSendHistory(sessionID: Long, content: String): Long
-    suspend fun updateReceiveHistory(chatID: Long, content: ChatContent)
+    suspend fun updateReceiveHistory(chatID: Long, content: ChatContent, thinking: String? = null)
     suspend fun deleteChatHistory(chatHistory: ChatHistory): Boolean
 }
 
@@ -51,8 +51,13 @@ class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistorySt
         return id
     }
 
-    override suspend fun updateReceiveHistory(chatID: Long, content: ChatContent) {
-        appDatabase.chatHistoryDao().updateReceive(chatID, content.content, content.role)
+    override suspend fun updateReceiveHistory(
+        chatID: Long,
+        content: ChatContent,
+        thinking: String?
+    ) {
+        appDatabase.chatHistoryDao()
+            .updateReceive(chatID, content.content, content.role, thinking)
     }
 
     override suspend fun updateSession(session: Session): Boolean {

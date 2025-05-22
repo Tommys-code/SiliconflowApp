@@ -1,9 +1,11 @@
 package com.tommy.siliconflow.app.data.db
 
+import androidx.room.ColumnInfo
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.ForeignKey.Companion.CASCADE
+import androidx.room.Ignore
 import androidx.room.Index
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
@@ -26,6 +28,7 @@ data class ChatHistory(
     @Embedded(prefix = "send_") val send: ChatContent? = null,
     @Embedded(prefix = "receive_") val receive: ChatContent? = null,
     val createTime: Long,
+    val thinking: String? = null,
 )
 
 @Serializable

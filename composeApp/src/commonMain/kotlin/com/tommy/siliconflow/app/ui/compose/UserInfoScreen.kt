@@ -11,11 +11,8 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -51,7 +48,6 @@ import siliconflowapp.composeapp.generated.resources.api_key
 import siliconflowapp.composeapp.generated.resources.charge_balance
 import siliconflowapp.composeapp.generated.resources.copy_success
 import siliconflowapp.composeapp.generated.resources.gift_balance
-import siliconflowapp.composeapp.generated.resources.ic_back
 import siliconflowapp.composeapp.generated.resources.ic_content_copy
 import siliconflowapp.composeapp.generated.resources.id
 import siliconflowapp.composeapp.generated.resources.logout

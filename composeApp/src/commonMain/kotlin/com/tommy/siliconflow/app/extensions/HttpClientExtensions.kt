@@ -28,10 +28,12 @@ suspend inline fun <reified T> HttpClient.sseChat(
     ).incoming.mapNotNull {
         if (it.data != SSE_DONE) {
             try {
+                println(it.data)
                 val data = JsonSerializationHelper.jsonX()
                     .decodeFromString<ChatResponse>(it.data.orEmpty())
                 ChatResult.Progress(data)
             } catch (e: Exception) {
+                println(it.data)
                 ChatResult.Error(e)
             }
         } else {

@@ -21,15 +21,26 @@ fun ChatContent.receiveHistory(sessionID: Long, time: Long) = ChatHistory(
 
 fun ChatResponse.getChoiceDelta() = this.choices.getOrNull(0)?.delta
 
-fun ChoiceDelta.getContent() = content ?: reasoningContent.orEmpty()
+fun ChoiceDelta.toChatContent() = ChatContent(
+    content.orEmpty(),
+    Role.valueOfIgnoreCase(role),
+)
 
-fun ChatResponse.toChatContent() = getChoiceDelta()?.let {
-    ChatContent(it.getContent(), Role.valueOfIgnoreCase(it.role))
-}
-
-fun ChatResult<ChatResponse>.toChatContentResult(): ChatResult<ChatContent>? = when (this) {
+fun ChatResult<ChatResponse>.toChatContentResult(): ChatResult<ChoiceDelta>? = when (this) {
     ChatResult.Start -> ChatResult.Start
     ChatResult.Finish -> ChatResult.Finish
-    is ChatResult.Progress -> this.data.toChatContent()?.let { ChatResult.Progress(it) }
+    is ChatResult.Progress -> data.getChoiceDelta()?.let { ChatResult.Progress(it) }
     is ChatResult.Error -> ChatResult.Error(this.e)
+}
+
+fun ChoiceDelta.appendContent(choiceDelta: ChoiceDelta): ChoiceDelta {
+    return copy(
+        content = content.appendContent(choiceDelta.content),
+        reasoningContent = reasoningContent.appendContent(choiceDelta.reasoningContent),
+    )
+}
+
+private fun String?.appendContent(content: String?): String? {
+    if (this == null) return content
+    return content?.let { this + it } ?: this
 }

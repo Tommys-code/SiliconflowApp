@@ -2,7 +2,6 @@ package com.tommy.siliconflow.app.extensions
 
 import androidx.navigation.NavHostController
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 

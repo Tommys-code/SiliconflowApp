@@ -1,7 +1,6 @@
 package com.tommy.siliconflow.app.datasbase
 
 import com.tommy.siliconflow.app.model.LocalAIModel
-import com.tommy.siliconflow.app.model.LocalAITextModel
 import com.tommy.siliconflow.app.model.TextAIModel
 import com.tommy.siliconflow.app.model.toLocalAIModel
 import com.tommy.siliconflow.app.network.JsonSerializationHelper

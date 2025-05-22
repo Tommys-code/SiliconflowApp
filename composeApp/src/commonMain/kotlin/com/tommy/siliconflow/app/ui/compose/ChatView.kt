@@ -5,9 +5,12 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -24,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
@@ -78,7 +82,15 @@ internal fun ChatView(
         ) {
             localAnswer.value.let {
                 when (it) {
-                    is ChatResult.Progress -> item { ReceiveText(it.data.content) }
+                    is ChatResult.Progress -> item {
+                        it.data.content?.let { content ->
+                            ReceiveText(content)
+                        }
+                        it.data.reasoningContent?.let { content ->
+                            ThinkingText(content)
+                        }
+                    }
+
                     is ChatResult.Error -> item { ReceiveText(it.e.message.orEmpty()) }
                     else -> {}
                 }
@@ -144,7 +156,21 @@ internal fun ChatView(
 
 @Composable
 private fun ReceiveText(content: String, modifier: Modifier = Modifier) {
-    Text(content, modifier = modifier.padding(bottom = 10.dp))
+    Text(content.trim(), modifier = modifier.padding(bottom = 10.dp))
+}
+
+@Composable
+private fun ThinkingText(content: String, modifier: Modifier = Modifier) {
+    Row(modifier = modifier.height(IntrinsicSize.Min).padding(bottom = 20.dp)) {
+        VerticalDivider(
+            thickness = 5.dp,
+            modifier = Modifier.background(Color.Black).fillMaxHeight()
+        )
+        Text(
+            content.trim(),
+            modifier = modifier.padding(start = 8.dp),
+        )
+    }
 }
 
 @Composable
@@ -163,6 +189,25 @@ private fun ChatBox(chat: ChatHistory, popupState: MutableState<ChatPopupState?>
                                     ?: IntOffset(0, 0),
                                 history = chat,
                                 type = ChatType.RECEIVER,
+                            )
+                        }
+                    )
+                }
+        )
+    }
+    chat.thinking?.let {
+        var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+        ThinkingText(
+            it, modifier = Modifier
+                .onGloballyPositioned { cor -> coordinates = cor }
+                .pointerInput(Unit) {
+                    detectTapGestures(
+                        onLongPress = { offset ->
+                            popupState.value = ChatPopupState(
+                                offset = coordinates?.localToWindow(offset)?.round()
+                                    ?: IntOffset(0, 0),
+                                history = chat,
+                                type = ChatType.THINKING,
                             )
                         }
                     )

@@ -44,6 +44,7 @@ import siliconflowapp.composeapp.generated.resources.ic_delete
 enum class ChatType {
     SEND,
     RECEIVER,
+    THINKING,
 }
 
 @Stable
@@ -53,10 +54,10 @@ data class ChatPopupState(
     val type: ChatType,
 ) {
     val content: String?
-        get() = if (type == ChatType.SEND) {
-            history.send?.content
-        } else {
-            history.receive?.content
+        get() = when (type) {
+            ChatType.THINKING -> history.thinking
+            ChatType.SEND -> history.send?.content
+            ChatType.RECEIVER -> history.receive?.content
         }
 }
 

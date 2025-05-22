@@ -22,8 +22,13 @@ interface ChatHistoryDao {
     @Query("SELECT * FROM ChatHistory WHERE sessionId = :sessionId ORDER BY createTime DESC")
     fun getChatByID(sessionId: Long): Flow<List<ChatHistory>>
 
-    @Query("UPDATE ChatHistory SET receive_content = :newContent,receive_role = :newRole WHERE id = :id")
-    suspend fun updateReceive(id: Long, newContent: String?, newRole: Role)
+    @Query("UPDATE ChatHistory SET receive_content = :newContent,receive_role = :newRole,thinking = :thinking WHERE id = :id")
+    suspend fun updateReceive(
+        id: Long,
+        newContent: String?,
+        newRole: Role,
+        thinking: String? = null
+    )
 
     @Delete
     suspend fun deleteChatHistory(chatHistory: ChatHistory): Int

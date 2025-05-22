@@ -3,12 +3,14 @@ package com.tommy.siliconflow.app.repository
 import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.ChatResult
 import com.tommy.siliconflow.app.data.network.Message
-import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.data.network.ChoiceDelta
 import com.tommy.siliconflow.app.datasbase.ChatHistoryStore
 import com.tommy.siliconflow.app.datasbase.SettingDataStore
+import com.tommy.siliconflow.app.extensions.appendContent
+import com.tommy.siliconflow.app.extensions.toChatContent
 import com.tommy.siliconflow.app.extensions.toChatContentResult
 import com.tommy.siliconflow.app.network.service.SSEService
 import kotlinx.coroutines.CoroutineScope
@@ -45,8 +47,8 @@ class ChatRepository(
         session?.let { chatHistoryStore.getChatHistory(it.id) } ?: flowOf(emptyList())
     }
 
-    private val _answer = MutableStateFlow<ChatResult<ChatContent>?>(null)
-    val answer: StateFlow<ChatResult<ChatContent>?> = _answer
+    private val _answer = MutableStateFlow<ChatResult<ChoiceDelta>?>(null)
+    val answer: StateFlow<ChatResult<ChoiceDelta>?> = _answer
 
     init {
         scope.launch { _currentSession.value = sessionList.conflate().first().getOrNull(0) }
@@ -84,14 +86,18 @@ class ChatRepository(
     private suspend fun updateAnswer(data: ChatResult<ChatResponse>, chatID: Long) {
         if (data is ChatResult.Finish) {
             (_answer.value as? ChatResult.Progress)?.let {
-                chatHistoryStore.updateReceiveHistory(chatID, it.data)
+                chatHistoryStore.updateReceiveHistory(
+                    chatID,
+                    it.data.toChatContent(),
+                    it.data.reasoningContent,
+                )
             }
         }
 
         data.toChatContentResult()?.let { cur ->
             if (cur is ChatResult.Progress && _answer.value is ChatResult.Progress) {
                 (_answer.value as ChatResult.Progress).data.let {
-                    _answer.emit(ChatResult.Progress(it.copy(content = it.content + cur.data.content)))
+                    _answer.emit(ChatResult.Progress(it.appendContent(cur.data)))
                 }
             } else {
                 _answer.emit(cur)
