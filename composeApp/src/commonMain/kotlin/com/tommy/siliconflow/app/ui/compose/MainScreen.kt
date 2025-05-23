@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,6 +19,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.model.LocalAIModel
 import com.tommy.siliconflow.app.navigation.Route
@@ -104,7 +107,12 @@ private fun TitleView(title: String, doEvent: (MainViewEvent) -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier.clickable { doEvent.invoke(MainViewEvent.Navigate(Route.MODEL_LIST_SCREEN)) }
     ) {
-        Text(title)
+        Text(
+            title,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.widthIn(max = 200.dp),
+        )
         Icon(
             painter = painterResource(Res.drawable.ic_drop_down),
             contentDescription = "more",
