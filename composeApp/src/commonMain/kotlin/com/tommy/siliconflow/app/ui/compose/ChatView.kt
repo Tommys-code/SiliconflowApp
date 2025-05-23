@@ -50,13 +50,16 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.mikepenz.markdown.model.State
 import com.tommy.siliconflow.app.data.ChatResult
-import com.tommy.siliconflow.app.data.db.ChatHistory
+import com.tommy.siliconflow.app.data.MarkdownChatHistory
+import com.tommy.siliconflow.app.ui.components.SilMarkDown
 import com.tommy.siliconflow.app.ui.dialog.ChatPopup
 import com.tommy.siliconflow.app.ui.dialog.ChatPopupState
 import com.tommy.siliconflow.app.ui.dialog.ChatType
 import com.tommy.siliconflow.app.ui.theme.CommonColor
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
+import kotlinx.coroutines.flow.conflate
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import siliconflowapp.composeapp.generated.resources.Res
@@ -72,7 +75,7 @@ internal fun ChatView(
     val focusManager = LocalFocusManager.current
     val popupState = remember { mutableStateOf<ChatPopupState?>(null) }
 
-    val localAnswer = viewModel.answer.collectAsStateWithLifecycle()
+    val localAnswer = viewModel.answer.conflate().collectAsStateWithLifecycle(null)
     val chatHistory = viewModel.chatHistory.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = modifier.fillMaxSize()) {
@@ -83,15 +86,15 @@ internal fun ChatView(
             localAnswer.value.let {
                 when (it) {
                     is ChatResult.Progress -> item {
-                        it.data.content?.let { content ->
-                            ReceiveText(content)
+                        it.data.contentMarkdown?.let { content ->
+                            ReceiveText(state = content)
                         }
-                        it.data.reasoningContent?.let { content ->
-                            ThinkingText(content)
+                        it.data.reasoningMarkdown?.let { content ->
+                            ThinkingText(state = content)
                         }
                     }
 
-                    is ChatResult.Error -> item { ReceiveText(it.e.message.orEmpty()) }
+                    is ChatResult.Error -> item { Text(it.e.message.orEmpty()) }
                     else -> {}
                 }
             }
@@ -155,31 +158,35 @@ internal fun ChatView(
 }
 
 @Composable
-private fun ReceiveText(content: String, modifier: Modifier = Modifier) {
-    Text(content.trim(), modifier = modifier.padding(bottom = 10.dp))
+private fun ReceiveText(
+    state: State,
+    modifier: Modifier = Modifier
+) {
+    SilMarkDown(state = state, modifier = modifier.padding(bottom = 10.dp))
 }
 
 @Composable
-private fun ThinkingText(content: String, modifier: Modifier = Modifier) {
+private fun ThinkingText(
+    state: State,
+    modifier: Modifier = Modifier
+) {
     Row(modifier = modifier.height(IntrinsicSize.Min).padding(bottom = 20.dp)) {
-        VerticalDivider(
-            thickness = 5.dp,
-            modifier = Modifier.background(Color.Black).fillMaxHeight()
-        )
-        Text(
-            content.trim(),
-            modifier = modifier.padding(start = 8.dp),
+        VerticalDivider(modifier.fillMaxHeight())
+        SilMarkDown(
+            state = state,
+            modifier = modifier.padding(start = 12.dp),
+            paragraphStyle = MaterialTheme.typography.bodySmall,
         )
     }
 }
 
 @Composable
-private fun ChatBox(chat: ChatHistory, popupState: MutableState<ChatPopupState?>) {
-    chat.receive?.let {
+private fun ChatBox(chat: MarkdownChatHistory, popupState: MutableState<ChatPopupState?>) {
+    chat.contentMarkdown?.let {
         var receiveCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
         ReceiveText(
-            it.content,
-            Modifier
+            state = it,
+            modifier = Modifier
                 .onGloballyPositioned { cor -> receiveCoordinates = cor }
                 .pointerInput(Unit) {
                     detectTapGestures(
@@ -187,7 +194,7 @@ private fun ChatBox(chat: ChatHistory, popupState: MutableState<ChatPopupState?>
                             popupState.value = ChatPopupState(
                                 offset = receiveCoordinates?.localToWindow(offset)?.round()
                                     ?: IntOffset(0, 0),
-                                history = chat,
+                                history = chat.chatHistory,
                                 type = ChatType.RECEIVER,
                             )
                         }
@@ -195,10 +202,11 @@ private fun ChatBox(chat: ChatHistory, popupState: MutableState<ChatPopupState?>
                 }
         )
     }
-    chat.thinking?.let {
+    chat.thinkingMarkdown?.let {
         var coordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
         ThinkingText(
-            it, modifier = Modifier
+            state = it,
+            modifier = Modifier
                 .onGloballyPositioned { cor -> coordinates = cor }
                 .pointerInput(Unit) {
                     detectTapGestures(
@@ -206,7 +214,7 @@ private fun ChatBox(chat: ChatHistory, popupState: MutableState<ChatPopupState?>
                             popupState.value = ChatPopupState(
                                 offset = coordinates?.localToWindow(offset)?.round()
                                     ?: IntOffset(0, 0),
-                                history = chat,
+                                history = chat.chatHistory,
                                 type = ChatType.THINKING,
                             )
                         }
@@ -214,7 +222,7 @@ private fun ChatBox(chat: ChatHistory, popupState: MutableState<ChatPopupState?>
                 }
         )
     }
-    chat.send?.let {
+    chat.chatHistory.send?.let {
         var sendCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
         Box(
             modifier = Modifier
@@ -226,7 +234,7 @@ private fun ChatBox(chat: ChatHistory, popupState: MutableState<ChatPopupState?>
                             popupState.value = ChatPopupState(
                                 offset = sendCoordinates?.localToWindow(offset)?.round()
                                     ?: IntOffset(0, 0),
-                                history = chat,
+                                history = chat.chatHistory,
                                 type = ChatType.SEND,
                             )
                         }

@@ -61,6 +61,7 @@ kotlin {
             implementation(libs.coil.network.ktor)
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
+            implementation(libs.markdown)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

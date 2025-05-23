@@ -1,21 +1,18 @@
 package com.tommy.siliconflow.app.extensions
 
-import com.tommy.siliconflow.app.data.network.ChatResponse
+import com.tommy.siliconflow.app.data.AnswerMarkdown
 import com.tommy.siliconflow.app.data.ChatResult
-import com.tommy.siliconflow.app.data.network.ChoiceDelta
+import com.tommy.siliconflow.app.data.MarkdownChatHistory
 import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
+import com.tommy.siliconflow.app.data.network.ChatResponse
+import com.tommy.siliconflow.app.data.network.ChoiceDelta
+import com.tommy.siliconflow.app.ui.components.parseMarkdown
 
 fun ChatContent.sendHistory(sessionID: Long, time: Long) = ChatHistory(
     sessionId = sessionID,
     send = this,
-    createTime = time,
-)
-
-fun ChatContent.receiveHistory(sessionID: Long, time: Long) = ChatHistory(
-    sessionId = sessionID,
-    receive = this,
     createTime = time,
 )
 
@@ -26,11 +23,8 @@ fun ChoiceDelta.toChatContent() = ChatContent(
     Role.valueOfIgnoreCase(role),
 )
 
-fun ChatResult<ChatResponse>.toChatContentResult(): ChatResult<ChoiceDelta>? = when (this) {
-    ChatResult.Start -> ChatResult.Start
-    ChatResult.Finish -> ChatResult.Finish
-    is ChatResult.Progress -> data.getChoiceDelta()?.let { ChatResult.Progress(it) }
-    is ChatResult.Error -> ChatResult.Error(this.e)
+fun ChatResult<ChatResponse>.toChatContentResult(): ChatResult<ChoiceDelta>? = toOtherResult {
+    it.getChoiceDelta()
 }
 
 fun ChoiceDelta.appendContent(choiceDelta: ChoiceDelta): ChoiceDelta {
@@ -43,4 +37,47 @@ fun ChoiceDelta.appendContent(choiceDelta: ChoiceDelta): ChoiceDelta {
 private fun String?.appendContent(content: String?): String? {
     if (this == null) return content
     return content?.let { this + it } ?: this
+}
+
+fun <IN, OUT> ChatResult<IN>.toOtherResult(transform: (IN) -> OUT?): ChatResult<OUT>? {
+    return when (this) {
+        is ChatResult.Start -> ChatResult.Start
+        is ChatResult.Progress -> transform(this.data)?.let { ChatResult.Progress(it) }
+        is ChatResult.Finish -> ChatResult.Finish
+        is ChatResult.Error -> ChatResult.Error(this.e)
+    }
+}
+
+suspend fun ChatHistory.toMarkdownChatHistory(): MarkdownChatHistory {
+    return MarkdownChatHistory(
+        chatHistory = this,
+        contentMarkdown = receive?.content?.let {
+            parseMarkdown(content = it)
+        },
+        thinkingMarkdown = thinking?.let {
+            parseMarkdown(content = it)
+        },
+    )
+}
+
+suspend fun <IN, OUT> ChatResult<IN>.toOtherResultBlock(transform: suspend (IN) -> OUT): ChatResult<OUT>? {
+    return when (this) {
+        is ChatResult.Start -> ChatResult.Start
+        is ChatResult.Progress -> transform(this.data)?.let { ChatResult.Progress(it) }
+        is ChatResult.Finish -> ChatResult.Finish
+        is ChatResult.Error -> ChatResult.Error(this.e)
+    }
+}
+
+suspend fun ChatResult<ChoiceDelta>.toAnswerMarkdown(): ChatResult<AnswerMarkdown>? {
+    return toOtherResultBlock {
+        AnswerMarkdown(
+            contentMarkdown = it.content?.let { content ->
+                parseMarkdown(content = content)
+            },
+            reasoningMarkdown = it.reasoningContent?.let { content ->
+                parseMarkdown(content = content)
+            },
+        )
+    }
 }

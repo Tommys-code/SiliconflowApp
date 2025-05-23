@@ -1,12 +1,12 @@
 package com.tommy.siliconflow.app.repository
 
-import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.ChatResult
-import com.tommy.siliconflow.app.data.network.Message
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.network.ChoiceDelta
+import com.tommy.siliconflow.app.data.network.Message
 import com.tommy.siliconflow.app.datasbase.ChatHistoryStore
 import com.tommy.siliconflow.app.datasbase.SettingDataStore
 import com.tommy.siliconflow.app.extensions.appendContent
@@ -15,6 +15,7 @@ import com.tommy.siliconflow.app.extensions.toChatContentResult
 import com.tommy.siliconflow.app.network.service.SSEService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -42,13 +43,13 @@ class ChatRepository(
     private val _currentSession = MutableStateFlow<Session?>(null)
     val currentSession: StateFlow<Session?> = _currentSession
 
+    private val _answer = MutableStateFlow<ChatResult<ChoiceDelta>?>(null)
+    val answer: StateFlow<ChatResult<ChoiceDelta>?> = _answer
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val chatHistory: Flow<List<ChatHistory>> = currentSession.flatMapLatest { session ->
         session?.let { chatHistoryStore.getChatHistory(it.id) } ?: flowOf(emptyList())
     }
-
-    private val _answer = MutableStateFlow<ChatResult<ChoiceDelta>?>(null)
-    val answer: StateFlow<ChatResult<ChoiceDelta>?> = _answer
 
     init {
         scope.launch { _currentSession.value = sessionList.conflate().first().getOrNull(0) }
@@ -99,6 +100,10 @@ class ChatRepository(
                 (_answer.value as ChatResult.Progress).data.let {
                     _answer.emit(ChatResult.Progress(it.appendContent(cur.data)))
                 }
+            } else if (cur is ChatResult.Finish) {
+                // parse markdown need time, delay to ensure the UI is updated
+                delay(500)
+                _answer.emit(cur)
             } else {
                 _answer.emit(cur)
             }

@@ -8,12 +8,18 @@ import com.tommy.siliconflow.app.data.MainViewState
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.datasbase.ModelStore
+import com.tommy.siliconflow.app.extensions.toAnswerMarkdown
+import com.tommy.siliconflow.app.extensions.toMarkdownChatHistory
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.StringResource
 import siliconflowapp.composeapp.generated.resources.Res
@@ -24,7 +30,8 @@ import siliconflowapp.composeapp.generated.resources.edit_session_name_success
 
 sealed class MainViewEvent {
     data class Navigate(val route: String) : MainViewEvent()
-    data class ShowToast(val msg: String? = null, val msgRes: StringResource? = null) : MainViewEvent()
+    data class ShowToast(val msg: String? = null, val msgRes: StringResource? = null) :
+        MainViewEvent()
 
     data class ToggleDrawer(val scope: CoroutineScope) : MainViewEvent()
     data class ChangeSession(val session: Session?) : MainViewEvent()
@@ -54,8 +61,14 @@ class MainViewModel(
 
     val sessionList = chatRepository.sessionList
     val currentSession = chatRepository.currentSession
-    val chatHistory = chatRepository.chatHistory
-    val answer = chatRepository.answer
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val chatHistory = chatRepository.chatHistory.mapLatest {
+        it.map { chatHistory -> chatHistory.toMarkdownChatHistory() }
+    }
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val answer = chatRepository.answer.buffer(0, BufferOverflow.DROP_OLDEST).mapLatest {
+        it?.toAnswerMarkdown()
+    }
     val currentModel = modelStore.currentModel
 
     init {

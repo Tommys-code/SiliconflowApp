@@ -23,6 +23,8 @@ coil3 = "3.2.0"
 androidx-room = "2.7.1"
 ksp = "2.1.21-2.0.1"
 sqlite = "2.5.1"
+markdown = "0.34.0"
+html-to-compose = "1.0.4"
 
 [libraries]
 kotlin-test = { module = "org.jetbrains.kotlin:kotlin-test", version.ref = "kotlin" }
@@ -60,6 +62,9 @@ coil-network-ktor = { module = "io.coil-kt.coil3:coil-network-ktor3", version.re
 androidx-room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "androidx-room" }
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
+markdown = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown" }
+#markdown = { module = "org.jetbrains:markdown", version.ref = "markdown" }
+#html-to-compose = { module = "be.digitalia.compose.htmlconverter:htmlconverter", version.ref = "html-to-compose" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
