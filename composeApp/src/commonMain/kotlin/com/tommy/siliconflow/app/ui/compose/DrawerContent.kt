@@ -66,7 +66,6 @@ import siliconflowapp.composeapp.generated.resources.create_new_session
 import siliconflowapp.composeapp.generated.resources.delete
 import siliconflowapp.composeapp.generated.resources.delete_with_num
 import siliconflowapp.composeapp.generated.resources.ic_circle_add
-import siliconflowapp.composeapp.generated.resources.ic_settings
 import siliconflowapp.composeapp.generated.resources.select_all
 import siliconflowapp.composeapp.generated.resources.title
 
@@ -226,11 +225,11 @@ private fun DrawerBottom(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-            Icon(
-                painter = painterResource(Res.drawable.ic_settings),
-                contentDescription = "setting",
-                modifier = Modifier.clickable { }
-            )
+//            Icon(
+//                painter = painterResource(Res.drawable.ic_settings),
+//                contentDescription = "setting",
+//                modifier = Modifier.clickable { }
+//            )
         }
     }
 }

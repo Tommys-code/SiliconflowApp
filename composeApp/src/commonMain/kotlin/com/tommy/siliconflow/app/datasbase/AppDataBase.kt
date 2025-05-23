@@ -13,6 +13,7 @@ import kotlinx.coroutines.IO
 
 @Database(
     entities = [Session::class, ChatHistory::class],
+    exportSchema = true,
     version = 3,
     autoMigrations = [
         AutoMigration(from = 1, to = 2),

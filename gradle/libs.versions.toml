@@ -63,8 +63,6 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 androidx-room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "androidx-room" }
 sqlite-bundled = { module = "androidx.sqlite:sqlite-bundled", version.ref = "sqlite" }
 markdown = { module = "com.mikepenz:multiplatform-markdown-renderer-m3", version.ref = "markdown" }
-#markdown = { module = "org.jetbrains:markdown", version.ref = "markdown" }
-#html-to-compose = { module = "be.digitalia.compose.htmlconverter:htmlconverter", version.ref = "html-to-compose" }
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }

@@ -122,7 +122,7 @@ class MainViewModel(
 
     fun sendData(data: String) {
         viewModelScope.launch {
-            chatRepository.sendData(data)
+            chatRepository.sendData(data.trim())
         }
     }
 
