@@ -46,7 +46,7 @@ fun LanguageSettingScreen(
                 .padding(innerPadding).clip(RoundedCornerShape(12.dp))
                 .background(CommonColor.SettingLineBg),
         ) {
-            viewModel.allLanguages.forEach {
+            viewModel.allLanguages.forEachIndexed { index, it ->
                 LanguageItem(
                     title = stringResource(it.title),
                     desc = if (it == Language.DEFAULT) stringResource(Res.string.language_default_tips) else null,
@@ -54,13 +54,14 @@ fun LanguageSettingScreen(
                     click = {
                         if (it == settingOptions?.language) return@LanguageItem
                         viewModel.changeLanguage(it)
-                        popBack()
                     },
                 )
-                HorizontalDivider(
-                    thickness = 0.5.dp,
-                    modifier = Modifier.padding(horizontal = 12.dp)
-                )
+                if (index != viewModel.allLanguages.lastIndex) {
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        modifier = Modifier.padding(horizontal = 12.dp)
+                    )
+                }
             }
         }
     }
