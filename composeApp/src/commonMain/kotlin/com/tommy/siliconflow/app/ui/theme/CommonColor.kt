@@ -18,4 +18,7 @@ object CommonColor {
 
     @Stable
     val LoadingBg = Color.Black.copy(alpha = 0.6f)
+
+    @Stable
+    val SettingLineBg = Color(0xFFEEEEEE)
 }

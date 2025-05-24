@@ -5,7 +5,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-fun NavHostController.navigateAndPopBackStack(newRoute: String, popRoute: String? = null) {
+fun <T : Any> NavHostController.navigateAndPopBackStack(newRoute: T, popRoute: String? = null) {
     navigate(newRoute) {
         (popRoute ?: this@navigateAndPopBackStack.currentBackStackEntry?.destination?.route)?.let {
             popUpTo(it) { inclusive = true }
@@ -14,7 +14,7 @@ fun NavHostController.navigateAndPopBackStack(newRoute: String, popRoute: String
     }
 }
 
-fun NavHostController.navigateAndClearAll(route: String) {
+fun <T : Any> NavHostController.navigateAndClearAll(route: T) {
     navigate(route) {
         popUpTo(0)
         launchSingleTop = true

@@ -33,6 +33,6 @@
     <string name="delete_chat_tips">This operation will delete both the question and the answer, and the content cannot be recovered after deletion</string>
     <string name="setting">Settings</string>
     <string name="setting_language">Language</string>
-    <string name="language_default">Use System Settings</string>
+    <string name="language_default">Follow system</string>
     <string name="language_default_tips">Only simplified Chinese and English are supported</string>
 </resources>

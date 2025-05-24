@@ -29,7 +29,7 @@ import siliconflowapp.composeapp.generated.resources.edit_session_name_error
 import siliconflowapp.composeapp.generated.resources.edit_session_name_success
 
 sealed class MainViewEvent {
-    data class Navigate(val route: String) : MainViewEvent()
+    data class Navigate(val route: Any) : MainViewEvent()
     data class ShowToast(val msg: String? = null, val msgRes: StringResource? = null) :
         MainViewEvent()
 

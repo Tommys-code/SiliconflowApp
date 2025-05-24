@@ -12,9 +12,11 @@ import com.tommy.siliconflow.app.network.service.SSEService
 import com.tommy.siliconflow.app.network.service.SiliconFlowService
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
+import com.tommy.siliconflow.app.viewmodel.AppViewModel
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import com.tommy.siliconflow.app.viewmodel.LoginViewModel
 import com.tommy.siliconflow.app.viewmodel.ModelListViewModel
+import com.tommy.siliconflow.app.viewmodel.SettingViewModel
 import com.tommy.siliconflow.app.viewmodel.SplashViewModel
 import com.tommy.siliconflow.app.viewmodel.UserInfoViewModel
 import io.ktor.client.HttpClient
@@ -24,6 +26,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.qualifier
 import org.koin.dsl.module
 
@@ -68,11 +71,13 @@ object KMMInject {
                 clientModule,
                 serviceModule,
                 module {
-                    viewModel { LoginViewModel(get(), get()) }
-                    viewModel { SplashViewModel(get()) }
-                    viewModel { MainViewModel(get(), get(), get()) }
-                    viewModel { UserInfoViewModel(get()) }
-                    viewModel { ModelListViewModel(get()) }
+                    viewModelOf(::AppViewModel)
+                    viewModelOf(::LoginViewModel)
+                    viewModelOf(::SplashViewModel)
+                    viewModelOf(::MainViewModel)
+                    viewModelOf(::UserInfoViewModel)
+                    viewModelOf(::ModelListViewModel)
+                    viewModelOf(::SettingViewModel)
                 }
             )
         }

@@ -16,7 +16,7 @@ import siliconflowapp.composeapp.generated.resources.ic_silicon_flow
 
 @Composable
 internal fun SplashScreen(
-    onNavigate: (route: String) -> Unit,
+    onNavigate: (route: Any) -> Unit,
     modifier: Modifier = Modifier,
     viewModel: SplashViewModel = koinViewModel(),
 ) {

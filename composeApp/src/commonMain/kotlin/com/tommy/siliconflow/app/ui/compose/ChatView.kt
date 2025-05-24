@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.ui.compose
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -33,11 +35,13 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -60,10 +64,12 @@ import com.tommy.siliconflow.app.ui.dialog.ChatType
 import com.tommy.siliconflow.app.ui.theme.CommonColor
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.conflate
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.enter_question
+import siliconflowapp.composeapp.generated.resources.ic_arrow_down
 import siliconflowapp.composeapp.generated.resources.ic_send
 
 @Composable
@@ -73,33 +79,53 @@ internal fun ChatView(
 ) {
     var text by remember { mutableStateOf(TextFieldValue("")) }
     val focusManager = LocalFocusManager.current
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
     val popupState = remember { mutableStateOf<ChatPopupState?>(null) }
 
     val localAnswer = viewModel.answer.conflate().collectAsStateWithLifecycle(null)
     val chatHistory = viewModel.chatHistory.collectAsStateWithLifecycle(emptyList())
 
     Column(modifier = modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth().weight(1f).padding(horizontal = 16.dp),
-            reverseLayout = true,
-        ) {
-            localAnswer.value.let {
-                when (it) {
-                    is ChatResult.Progress -> item {
-                        it.data.contentMarkdown?.let { content ->
-                            ReceiveText(state = content)
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                reverseLayout = true,
+                state = listState,
+            ) {
+                localAnswer.value.let {
+                    when (it) {
+                        is ChatResult.Progress -> item {
+                            it.data.contentMarkdown?.let { content ->
+                                ReceiveText(state = content)
+                            }
+                            it.data.reasoningMarkdown?.let { content ->
+                                ThinkingText(state = content)
+                            }
                         }
-                        it.data.reasoningMarkdown?.let { content ->
-                            ThinkingText(state = content)
-                        }
-                    }
 
-                    is ChatResult.Error -> item { Text(it.e.message.orEmpty()) }
-                    else -> {}
+                        is ChatResult.Error -> item { Text(it.e.message.orEmpty()) }
+                        else -> {}
+                    }
+                }
+                items(chatHistory.value) { chat ->
+                    ChatBox(chat, popupState)
                 }
             }
-            items(chatHistory.value) { chat ->
-                ChatBox(chat, popupState)
+
+            if (listState.canScrollBackward) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_arrow_down),
+                    contentDescription = "scroll",
+                    modifier = Modifier.padding(bottom = 24.dp)
+                        .size(36.dp)
+                        .align(Alignment.BottomCenter)
+                        .shadow(elevation = 5.dp, shape = CircleShape, clip = false)
+                        .clip(CircleShape)
+                        .background(Color.White)
+                        .padding(top = 4.dp)
+                        .clickable { scope.launch { listState.scrollToItem(0) } },
+                )
             }
         }
         Card(

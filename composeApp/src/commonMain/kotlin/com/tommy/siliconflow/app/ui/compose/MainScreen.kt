@@ -23,7 +23,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.model.LocalAIModel
-import com.tommy.siliconflow.app.navigation.Route
+import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.ui.components.Toast
 import com.tommy.siliconflow.app.ui.dialog.MainViewDialog
 import com.tommy.siliconflow.app.ui.dialog.SessionPopup
@@ -39,7 +39,7 @@ import siliconflowapp.composeapp.generated.resources.ic_drop_down
 @Composable
 internal fun MainScreen(
     viewModel: MainViewModel = koinViewModel(),
-    onNavigate: (route: String) -> Unit,
+    onNavigate: (route: Any) -> Unit,
 ) {
     val hostState = SnackbarHostState()
     val model = viewModel.currentModel.collectAsStateWithLifecycle(null).value
@@ -105,7 +105,7 @@ private fun HomeTopAppBar(
 private fun TitleView(title: String, doEvent: (MainViewEvent) -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.clickable { doEvent.invoke(MainViewEvent.Navigate(Route.MODEL_LIST_SCREEN)) }
+        modifier = Modifier.clickable { doEvent.invoke(MainViewEvent.Navigate(AppScreen.ModelList)) }
     ) {
         Text(
             title,

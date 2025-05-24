@@ -1,9 +1,30 @@
 package com.tommy.siliconflow.app.navigation
 
-object Route {
-    const val SPLASH_SCREEN = "splashScreen"
-    const val LOGIN_SCREEN = "loginScreen"
-    const val MAIN_SCREEN = "mainScreen"
-    const val PERSONAL_INFO_SCREEN = "personalInfoScreen"
-    const val MODEL_LIST_SCREEN = "modelListScreen"
+import kotlinx.serialization.Serializable
+
+sealed class AppScreen {
+
+    @Serializable
+    data object Splash : AppScreen()
+
+    @Serializable
+    data object Login : AppScreen()
+
+    @Serializable
+    data object Main : AppScreen()
+
+    @Serializable
+    data object PersonalInfo : AppScreen()
+
+    @Serializable
+    data object ModelList : AppScreen()
+
+    @Serializable
+    data object SettingGraph {
+        @Serializable
+        data object Setting : AppScreen()
+
+        @Serializable
+        data object LanguageSetting : AppScreen()
+    }
 }

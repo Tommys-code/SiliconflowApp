@@ -28,7 +28,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.tommy.siliconflow.app.data.Resource
-import com.tommy.siliconflow.app.navigation.Route
+import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.network.error.ApiKeyEmptyException
 import com.tommy.siliconflow.app.network.error.GeneralException
 import com.tommy.siliconflow.app.ui.components.LoadingDialog
@@ -45,7 +45,7 @@ import siliconflowapp.composeapp.generated.resources.ic_silicon_flow
 
 @Composable
 internal fun LoginScreen(
-    navigate: (String) -> Unit,
+    navigate: (Any) -> Unit,
     loginViewModel: LoginViewModel = koinViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -119,7 +119,7 @@ internal fun LoginScreen(
 
             is Resource.Success -> {
                 showDialog.value = false
-                navigate.invoke(Route.MAIN_SCREEN)
+                navigate.invoke(AppScreen.Main)
             }
 
             else -> {

@@ -52,7 +52,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.data.network.UserInfo
-import com.tommy.siliconflow.app.navigation.Route
+import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.NormalButton
 import com.tommy.siliconflow.app.ui.theme.CommonColor
@@ -66,6 +66,7 @@ import siliconflowapp.composeapp.generated.resources.create_new_session
 import siliconflowapp.composeapp.generated.resources.delete
 import siliconflowapp.composeapp.generated.resources.delete_with_num
 import siliconflowapp.composeapp.generated.resources.ic_circle_add
+import siliconflowapp.composeapp.generated.resources.ic_settings
 import siliconflowapp.composeapp.generated.resources.select_all
 import siliconflowapp.composeapp.generated.resources.title
 
@@ -212,7 +213,7 @@ private fun DrawerBottom(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxHeight()
                     .clickable {
-                        doEvent.invoke(MainViewEvent.Navigate(Route.PERSONAL_INFO_SCREEN))
+                        doEvent.invoke(MainViewEvent.Navigate(AppScreen.PersonalInfo))
                     }
             ) {
                 ImageItem(
@@ -225,11 +226,13 @@ private fun DrawerBottom(
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
-//            Icon(
-//                painter = painterResource(Res.drawable.ic_settings),
-//                contentDescription = "setting",
-//                modifier = Modifier.clickable { }
-//            )
+            Icon(
+                painter = painterResource(Res.drawable.ic_settings),
+                contentDescription = "setting",
+                modifier = Modifier.clickable {
+                    doEvent.invoke(MainViewEvent.Navigate(AppScreen.SettingGraph))
+                }
+            )
         }
     }
 }

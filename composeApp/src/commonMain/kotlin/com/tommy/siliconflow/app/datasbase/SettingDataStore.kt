@@ -4,6 +4,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.tommy.siliconflow.app.data.Language
+import com.tommy.siliconflow.app.data.SettingOptions
 import com.tommy.siliconflow.app.data.network.UserInfo
 import com.tommy.siliconflow.app.network.JsonSerializationHelper
 import kotlinx.coroutines.flow.Flow
@@ -12,6 +14,9 @@ import kotlinx.coroutines.flow.map
 private const val API_KEY_NAME = "api_key"
 private const val USER_INFO_NAME = "user_info"
 private const val CHOOSE_MODEL_NAME = "choose_model"
+
+// setting
+private const val LANGUAGE_NAME = "language"
 
 private const val DEFAULT_MODEL = "Qwen/Qwen3-8B"
 
@@ -23,6 +28,8 @@ interface SettingDataStore {
     suspend fun removeUserData()
     fun getCurrentModel(): Flow<String?>
     suspend fun chooseModel(model: String)
+    fun getSettingOptions(): Flow<SettingOptions>
+    suspend fun saveSettingOptions(language: Language? = null)
 }
 
 class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : SettingDataStore {
@@ -30,6 +37,8 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
     private val apiKeyName = stringPreferencesKey(API_KEY_NAME)
     private val userInfoName = stringPreferencesKey(USER_INFO_NAME)
     private val aiModelName = stringPreferencesKey(CHOOSE_MODEL_NAME)
+
+    private val languageName = stringPreferencesKey(LANGUAGE_NAME)
 
     override fun getApiKey(): Flow<String?> {
         return dataStore.data.map { it[apiKeyName] }
@@ -66,5 +75,19 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
 
     override suspend fun chooseModel(model: String) {
         dataStore.edit { it[aiModelName] = model }
+    }
+
+    override fun getSettingOptions(): Flow<SettingOptions> {
+        return dataStore.data.map {
+            SettingOptions(
+                language = Language.valueOf(it[languageName])
+            )
+        }
+    }
+
+    override suspend fun saveSettingOptions(language: Language?) {
+        dataStore.edit { store ->
+            language?.let { store[languageName] = it.value.orEmpty() }
+        }
     }
 }
