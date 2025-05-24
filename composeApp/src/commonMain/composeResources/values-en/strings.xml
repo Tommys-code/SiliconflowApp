@@ -35,4 +35,9 @@
     <string name="setting_language">Language</string>
     <string name="language_default">Follow system</string>
     <string name="language_default_tips">Only simplified Chinese and English are supported</string>
+    <string name="setting_theme">Theme</string>
+    <string name="theme_default_tips">When enabled, the dark mode will follow system settings.</string>
+    <string name="setting_manual">Manual Setting</string>
+    <string name="light_theme">Light Mode</string>
+    <string name="dark_theme">Dark Mode</string>
 </resources>

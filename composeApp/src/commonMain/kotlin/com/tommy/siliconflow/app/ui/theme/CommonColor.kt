@@ -22,3 +22,7 @@ object CommonColor {
     @Stable
     val SettingLineBg = Color(0xFFEEEEEE)
 }
+
+object AppColor {
+
+}

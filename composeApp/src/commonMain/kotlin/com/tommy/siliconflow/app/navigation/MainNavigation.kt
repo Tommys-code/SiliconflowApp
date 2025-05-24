@@ -16,6 +16,7 @@ import com.tommy.siliconflow.app.ui.compose.SplashScreen
 import com.tommy.siliconflow.app.ui.compose.UserInfoScreen
 import com.tommy.siliconflow.app.ui.compose.setting.LanguageSettingScreen
 import com.tommy.siliconflow.app.ui.compose.setting.SettingScreen
+import com.tommy.siliconflow.app.ui.compose.setting.ThemeScreen
 import com.tommy.siliconflow.app.viewmodel.SettingViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -52,6 +53,12 @@ private fun NavGraphBuilder.settingNavigation(navController: NavHostController) 
                 viewModelStoreOwner = navController.getBackStackEntry(AppScreen.SettingGraph.Setting)
             )
             LanguageSettingScreen(settingViewModel) { navController.popBackStack() }
+        }
+        composable<AppScreen.SettingGraph.ThemeSetting> {
+            val settingViewModel = koinViewModel<SettingViewModel>(
+                viewModelStoreOwner = navController.getBackStackEntry(AppScreen.SettingGraph.Setting)
+            )
+            ThemeScreen(settingViewModel) { navController.popBackStack() }
         }
     }
 }

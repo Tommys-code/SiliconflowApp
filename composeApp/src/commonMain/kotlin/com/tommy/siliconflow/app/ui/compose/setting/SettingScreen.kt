@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.SettingOptions
+import com.tommy.siliconflow.app.data.getThemeTitle
 import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.ui.components.CustomTopBar
 import com.tommy.siliconflow.app.ui.theme.CommonColor
@@ -33,6 +35,7 @@ import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.ic_arrow_forward
 import siliconflowapp.composeapp.generated.resources.setting
 import siliconflowapp.composeapp.generated.resources.setting_language
+import siliconflowapp.composeapp.generated.resources.setting_theme
 
 @Composable
 fun SettingScreen(
@@ -58,6 +61,13 @@ fun SettingScreen(
                 stringResource(settingOptions.language.title),
             ) {
                 navigate(AppScreen.SettingGraph.LanguageSetting)
+            }
+            HorizontalDivider(thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 12.dp))
+            Item(
+                stringResource(Res.string.setting_theme),
+                stringResource(settingOptions.getThemeTitle()),
+            ) {
+                navigate(AppScreen.SettingGraph.ThemeSetting)
             }
         }
     }

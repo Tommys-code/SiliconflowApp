@@ -26,5 +26,8 @@ sealed class AppScreen {
 
         @Serializable
         data object LanguageSetting : AppScreen()
+
+        @Serializable
+        data object ThemeSetting : AppScreen()
     }
 }

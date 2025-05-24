@@ -14,7 +14,13 @@ class SettingViewModel(private val settingDataStore: SettingDataStore) : ViewMod
 
     fun changeLanguage(language: Language) {
         viewModelScope.launch {
-            settingDataStore.saveSettingOptions(language)
+            settingDataStore.saveLanguage(language)
+        }
+    }
+
+    fun changeTheme(usSystem: Boolean = true, isDarkMode: Boolean = false) {
+        viewModelScope.launch {
+            settingDataStore.changeTheme(usSystem, isDarkMode)
         }
     }
 }

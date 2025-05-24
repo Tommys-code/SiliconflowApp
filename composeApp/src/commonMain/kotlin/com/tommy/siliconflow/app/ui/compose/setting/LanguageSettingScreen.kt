@@ -68,7 +68,7 @@ fun LanguageSettingScreen(
 }
 
 @Composable
-private fun LanguageItem(
+internal fun LanguageItem(
     title: String,
     desc: String? = null,
     isSelected: Boolean,
