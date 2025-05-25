@@ -18,7 +18,6 @@ actual object LocalAppTheme {
             false -> SystemTheme.Light
             null -> LocalSystemTheme.current
         }
-
         return LocalSystemTheme.provides(new)
     }
 }
