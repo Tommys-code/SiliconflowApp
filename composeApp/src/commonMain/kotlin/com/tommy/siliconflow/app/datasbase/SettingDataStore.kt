@@ -33,7 +33,7 @@ interface SettingDataStore {
     suspend fun chooseModel(model: String)
     fun getSettingOptions(): Flow<SettingOptions>
     suspend fun saveLanguage(language: Language)
-    suspend fun changeTheme(useSystem: Boolean = true, isDarkMode: Boolean = false)
+    suspend fun changeTheme(useSystem: Boolean = true, isDarkMode: Boolean? = null)
 }
 
 class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : SettingDataStore {
@@ -99,14 +99,10 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
         }
     }
 
-    override suspend fun changeTheme(useSystem: Boolean, isDarkMode: Boolean) {
-        dataStore.edit {
-            if (useSystem) {
-                it[useSystemThemeName] = true
-            } else {
-                it[useSystemThemeName] = false
-                it[isDarkModeName] = isDarkMode
-            }
+    override suspend fun changeTheme(useSystem: Boolean, isDarkMode: Boolean?) {
+        dataStore.edit { store ->
+            store[useSystemThemeName] = useSystem
+            isDarkMode?.let { store[isDarkModeName] = it }
         }
     }
 }

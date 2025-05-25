@@ -23,7 +23,14 @@ import org.koin.compose.viewmodel.koinViewModel
 @Composable
 fun MainNavigation() {
     val navController = rememberNavController()
-    NavHost(navController, startDestination = AppScreen.Splash) {
+    NavHost(
+        navController,
+        startDestination = AppScreen.Splash,
+        enterTransition = NavigationAnimation.enterTransition,
+        exitTransition = NavigationAnimation.exitTransition,
+        popEnterTransition = NavigationAnimation.popEnterTransition,
+        popExitTransition = NavigationAnimation.popExitTransition,
+    ) {
         composable<AppScreen.Splash> { SplashScreen({ navController.navigateAndPopBackStack(it) }) }
         composable<AppScreen.Login> {
             LoginScreen(

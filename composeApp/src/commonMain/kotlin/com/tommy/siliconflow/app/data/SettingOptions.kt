@@ -35,3 +35,10 @@ fun SettingOptions.getThemeTitle(): StringResource {
         Res.string.light_theme
     }
 }
+
+val SettingOptions.isDark: Boolean?
+    get() = if (useSystemThem) {
+        null
+    } else {
+        isDarkMode
+    }

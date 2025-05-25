@@ -9,11 +9,11 @@ import androidx.compose.runtime.ReadOnlyComposable
 
 @Composable
 fun AppTheme(
-    customColorScheme: CustomColorScheme = AppTheme.colorScheme,
+    customColorScheme: CustomColorScheme,
     content: @Composable () -> Unit
 ) {
     CompositionLocalProvider(LocalCustomColorScheme provides customColorScheme) {
-        MaterialTheme(colorScheme = customColorScheme.colorScheme) {
+        MaterialTheme(customColorScheme.colorScheme) {
             content()
         }
     }

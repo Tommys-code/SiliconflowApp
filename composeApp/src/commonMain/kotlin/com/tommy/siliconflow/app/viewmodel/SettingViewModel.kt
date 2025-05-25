@@ -18,7 +18,7 @@ class SettingViewModel(private val settingDataStore: SettingDataStore) : ViewMod
         }
     }
 
-    fun changeTheme(usSystem: Boolean = true, isDarkMode: Boolean = false) {
+    fun changeTheme(usSystem: Boolean = true, isDarkMode: Boolean? = null) {
         viewModelScope.launch {
             settingDataStore.changeTheme(usSystem, isDarkMode)
         }
