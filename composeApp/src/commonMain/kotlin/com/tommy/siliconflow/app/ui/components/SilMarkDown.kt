@@ -3,6 +3,7 @@ package com.tommy.siliconflow.app.ui.components
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import com.mikepenz.markdown.compose.Markdown
 import com.mikepenz.markdown.m3.markdownColor
@@ -20,12 +21,13 @@ import org.intellij.markdown.parser.MarkdownParser
 fun SilMarkDown(
     state: State,
     modifier: Modifier = Modifier,
-    paragraphStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    paragraphStyle: TextStyle = MaterialTheme.typography.bodyLarge,
+    textColor: Color = MaterialTheme.colorScheme.onBackground,
 ) {
     Markdown(
         state = state,
         modifier = modifier,
-        colors = markdownColor(),
+        colors = markdownColor(text = textColor),
         typography = markdownTypography(
             paragraph = paragraphStyle,
             h1 = MaterialTheme.typography.headlineLarge,

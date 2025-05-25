@@ -12,7 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.tommy.siliconflow.app.ui.theme.CommonColor
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 
@@ -21,11 +21,11 @@ fun NormalButton(
     res: StringResource,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    textColor: Color = Color.Black,
+    textColor: Color = AppTheme.colorScheme.primaryText,
     enable: Boolean = true,
     shape: RoundedCornerShape = RoundedCornerShape(size = 10.dp),
     color: ButtonColors = ButtonDefaults.buttonColors(
-        containerColor = CommonColor.LightGray
+        containerColor = AppTheme.colorScheme.backgroundLeve1,
     ),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     border: BorderStroke? = null,
@@ -48,11 +48,11 @@ fun NormalButton(
     text: String,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
-    textColor: Color = Color.Black,
+    textColor: Color = AppTheme.colorScheme.primaryText,
     enable: Boolean = true,
     shape: RoundedCornerShape = RoundedCornerShape(size = 10.dp),
     color: ButtonColors = ButtonDefaults.buttonColors(
-        containerColor = CommonColor.LightGray
+        containerColor = AppTheme.colorScheme.backgroundLeve1,
     ),
     contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
     border: BorderStroke? = null,
@@ -67,8 +67,8 @@ fun NormalButton(
     ) {
         Text(
             text,
+            modifier = Modifier.padding(vertical = 8.dp),
             color = textColor,
-            modifier = Modifier.padding(vertical = 8.dp)
         )
     }
 }

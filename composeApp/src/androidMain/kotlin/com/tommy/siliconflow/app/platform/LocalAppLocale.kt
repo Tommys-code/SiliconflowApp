@@ -21,14 +21,10 @@ actual object LocalAppLocale {
         if (default == null) {
             default = Locale.getDefault()
         }
-
-        println("provides = $value")
-        println("provides default = $default")
         val new = when(value) {
             null -> default!!
             else -> Locale(value)
         }
-        println("provides = $new")
         Locale.setDefault(new)
         configuration.setLocale(new)
         val resources = LocalContext.current.resources

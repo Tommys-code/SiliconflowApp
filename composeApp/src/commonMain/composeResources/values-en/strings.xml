@@ -18,7 +18,7 @@
     <string name="delete">Delete</string>
     <string name="finish">Finish</string>
     <string name="cancel">Cancel</string>
-    <string name="select_all">Select all</string>
+    <string name="select_all">All</string>
     <string name="delete_with_num">Delete (%1$d)</string>
     <string name="personal_info_title">Personal information</string>
 
@@ -35,4 +35,9 @@
     <string name="setting_language">Language</string>
     <string name="language_default">Follow system</string>
     <string name="language_default_tips">Only simplified Chinese and English are supported</string>
+    <string name="setting_theme">Theme</string>
+    <string name="theme_default_tips">When enabled, the dark mode will follow system settings.</string>
+    <string name="setting_manual">Manual Setting</string>
+    <string name="light_theme">Light Mode</string>
+    <string name="dark_theme">Dark Mode</string>
 </resources>

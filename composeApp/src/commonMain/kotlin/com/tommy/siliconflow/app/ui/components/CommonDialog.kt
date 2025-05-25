@@ -15,10 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 
 @Composable
 fun CommonDialog(
@@ -31,14 +31,15 @@ fun CommonDialog(
         Column(
             modifier = Modifier.fillMaxWidth()
                 .clip(RoundedCornerShape(12.dp))
-                .background(Color.White)
+                .background(AppTheme.colorScheme.popContainer)
                 .padding(horizontal = 16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             Text(
                 title,
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
-                modifier = Modifier.padding(vertical = 12.dp)
+                modifier = Modifier.padding(vertical = 12.dp),
+                color = AppTheme.colorScheme.primaryText,
             )
             content()
             Row(

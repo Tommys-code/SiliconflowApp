@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.datasbase
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.tommy.siliconflow.app.data.Language
@@ -17,6 +18,8 @@ private const val CHOOSE_MODEL_NAME = "choose_model"
 
 // setting
 private const val LANGUAGE_NAME = "language"
+private const val USE_SYSTEM_THEME_NAME = "use_system_theme"
+private const val IS_DARK_MODE_NAME = "is_dark_mode"
 
 private const val DEFAULT_MODEL = "Qwen/Qwen3-8B"
 
@@ -29,7 +32,8 @@ interface SettingDataStore {
     fun getCurrentModel(): Flow<String?>
     suspend fun chooseModel(model: String)
     fun getSettingOptions(): Flow<SettingOptions>
-    suspend fun saveSettingOptions(language: Language? = null)
+    suspend fun saveLanguage(language: Language)
+    suspend fun changeTheme(useSystem: Boolean = true, isDarkMode: Boolean? = null)
 }
 
 class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : SettingDataStore {
@@ -39,6 +43,8 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
     private val aiModelName = stringPreferencesKey(CHOOSE_MODEL_NAME)
 
     private val languageName = stringPreferencesKey(LANGUAGE_NAME)
+    private val useSystemThemeName = booleanPreferencesKey(USE_SYSTEM_THEME_NAME)
+    private val isDarkModeName = booleanPreferencesKey(IS_DARK_MODE_NAME)
 
     override fun getApiKey(): Flow<String?> {
         return dataStore.data.map { it[apiKeyName] }
@@ -80,14 +86,23 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
     override fun getSettingOptions(): Flow<SettingOptions> {
         return dataStore.data.map {
             SettingOptions(
-                language = Language.valueOf(it[languageName])
+                language = Language.valueOf(it[languageName]),
+                useSystemThem = it[useSystemThemeName] ?: true,
+                isDarkMode = it[isDarkModeName] ?: false,
             )
         }
     }
 
-    override suspend fun saveSettingOptions(language: Language?) {
+    override suspend fun saveLanguage(language: Language) {
         dataStore.edit { store ->
-            language?.let { store[languageName] = it.value.orEmpty() }
+            store[languageName] = language.value.orEmpty()
+        }
+    }
+
+    override suspend fun changeTheme(useSystem: Boolean, isDarkMode: Boolean?) {
+        dataStore.edit { store ->
+            store[useSystemThemeName] = useSystem
+            isDarkMode?.let { store[isDarkModeName] = it }
         }
     }
 }

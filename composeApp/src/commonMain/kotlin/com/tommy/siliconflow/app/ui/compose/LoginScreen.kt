@@ -1,6 +1,8 @@
 package com.tommy.siliconflow.app.ui.compose
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -9,12 +11,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBarsPadding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -32,6 +36,8 @@ import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.network.error.ApiKeyEmptyException
 import com.tommy.siliconflow.app.network.error.GeneralException
 import com.tommy.siliconflow.app.ui.components.LoadingDialog
+import com.tommy.siliconflow.app.ui.theme.AppColor
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.LoginViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
@@ -41,11 +47,13 @@ import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.add_key_hilt
 import siliconflowapp.composeapp.generated.resources.add_key_title
 import siliconflowapp.composeapp.generated.resources.confirm
+import siliconflowapp.composeapp.generated.resources.ic_settings
 import siliconflowapp.composeapp.generated.resources.ic_silicon_flow
 
 @Composable
 internal fun LoginScreen(
     navigate: (Any) -> Unit,
+    navigateAndPopup: (Any) -> Unit,
     loginViewModel: LoginViewModel = koinViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -56,7 +64,9 @@ internal fun LoginScreen(
 
     Scaffold(snackbarHost = { SnackbarHost(snackbarHostState) }) {
         Box(
-            modifier = Modifier.fillMaxSize().systemBarsPadding(),
+            modifier = Modifier.fillMaxSize()
+                .background(AppTheme.colorScheme.cardContainer)
+                .systemBarsPadding(),
             contentAlignment = Alignment.Center
         ) {
             Column(
@@ -76,6 +86,12 @@ internal fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 18.dp, vertical = 10.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = AppColor.Transparent,
+                        unfocusedIndicatorColor = AppColor.Transparent,
+                        focusedContainerColor = AppTheme.colorScheme.backgroundLeve1,
+                        unfocusedContainerColor = AppTheme.colorScheme.backgroundLeve1,
+                    ),
                     value = keyValue.value,
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
@@ -98,6 +114,14 @@ internal fun LoginScreen(
                     Text(stringResource(Res.string.confirm))
                 }
             }
+            Icon(
+                painter = painterResource(Res.drawable.ic_settings),
+                contentDescription = "setting",
+                modifier = Modifier.align(Alignment.TopEnd)
+                    .clickable {
+                        navigate(AppScreen.SettingGraph.Setting)
+                    }.padding(24.dp)
+            )
         }
     }
     LoadingDialog(showDialog)
@@ -119,7 +143,7 @@ internal fun LoginScreen(
 
             is Resource.Success -> {
                 showDialog.value = false
-                navigate.invoke(AppScreen.Main)
+                navigateAndPopup.invoke(AppScreen.Main)
             }
 
             else -> {

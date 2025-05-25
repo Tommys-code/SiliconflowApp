@@ -16,15 +16,28 @@ import com.tommy.siliconflow.app.ui.compose.SplashScreen
 import com.tommy.siliconflow.app.ui.compose.UserInfoScreen
 import com.tommy.siliconflow.app.ui.compose.setting.LanguageSettingScreen
 import com.tommy.siliconflow.app.ui.compose.setting.SettingScreen
+import com.tommy.siliconflow.app.ui.compose.setting.ThemeScreen
 import com.tommy.siliconflow.app.viewmodel.SettingViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
 @Composable
 fun MainNavigation() {
     val navController = rememberNavController()
-    NavHost(navController, startDestination = AppScreen.Splash) {
+    NavHost(
+        navController,
+        startDestination = AppScreen.Splash,
+        enterTransition = NavigationAnimation.enterTransition,
+        exitTransition = NavigationAnimation.exitTransition,
+        popEnterTransition = NavigationAnimation.popEnterTransition,
+        popExitTransition = NavigationAnimation.popExitTransition,
+    ) {
         composable<AppScreen.Splash> { SplashScreen({ navController.navigateAndPopBackStack(it) }) }
-        composable<AppScreen.Login> { LoginScreen({ navController.navigateAndPopBackStack(it) }) }
+        composable<AppScreen.Login> {
+            LoginScreen(
+                { navController.navigate(it) },
+                { navController.navigateAndPopBackStack(it) },
+            )
+        }
         composable<AppScreen.Main> { MainScreen { navController.navigate(it) } }
         composable<AppScreen.PersonalInfo> {
             UserInfoScreen(
@@ -52,6 +65,12 @@ private fun NavGraphBuilder.settingNavigation(navController: NavHostController) 
                 viewModelStoreOwner = navController.getBackStackEntry(AppScreen.SettingGraph.Setting)
             )
             LanguageSettingScreen(settingViewModel) { navController.popBackStack() }
+        }
+        composable<AppScreen.SettingGraph.ThemeSetting> {
+            val settingViewModel = koinViewModel<SettingViewModel>(
+                viewModelStoreOwner = navController.getBackStackEntry(AppScreen.SettingGraph.Setting)
+            )
+            ThemeScreen(settingViewModel) { navController.popBackStack() }
         }
     }
 }

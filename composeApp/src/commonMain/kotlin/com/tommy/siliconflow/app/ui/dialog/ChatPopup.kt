@@ -16,7 +16,6 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.IntOffset
@@ -30,6 +29,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.extensions.popupPosition
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.MainViewEvent
 import org.jetbrains.compose.resources.DrawableResource
 import org.jetbrains.compose.resources.painterResource
@@ -87,7 +87,7 @@ fun ChatPopup(
                 modifier = Modifier
                     .shadow(elevation = 5.dp, shape = RoundedCornerShape(12.dp))
                     .width(150.dp)
-                    .background(Color.White),
+                    .background(AppTheme.colorScheme.popContainer),
             ) {
                 ChatPopupMenuItem(stringResource(Res.string.copy), Res.drawable.ic_content_copy) {
                     it.content?.let { content ->

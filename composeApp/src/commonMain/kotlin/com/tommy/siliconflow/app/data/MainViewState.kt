@@ -39,7 +39,9 @@ class MainViewState {
     }
 
     fun showPopup(session: Session, offset: IntOffset) {
-        _popupState.value = SessionPopupState(session, offset)
+        if (_selectSessions.value == null) {
+            _popupState.value = SessionPopupState(session, offset)
+        }
     }
 
     fun dismissPopup() {
