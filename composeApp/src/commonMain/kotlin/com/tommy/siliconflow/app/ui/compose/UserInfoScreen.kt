@@ -36,7 +36,7 @@ import com.tommy.siliconflow.app.ui.components.CustomTopBar
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.LoadingDialog
 import com.tommy.siliconflow.app.ui.components.NormalButton
-import com.tommy.siliconflow.app.ui.theme.CommonColor
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.UserInfoViewModel
 import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.getString
@@ -117,7 +117,7 @@ internal fun UserInfoScreen(
                     modifier =
                         Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(CommonColor.LightGray)
+                            .background(AppTheme.colorScheme.backgroundLeve1)
                             .padding(horizontal = 16.dp),
                 ) {
                     ColumnItem(stringResource(Res.string.id), it.id) {
@@ -142,7 +142,7 @@ internal fun UserInfoScreen(
                     modifier =
                         Modifier.padding(top = 12.dp, start = 24.dp, end = 24.dp)
                             .clip(RoundedCornerShape(12.dp))
-                            .background(CommonColor.LightGray)
+                            .background(AppTheme.colorScheme.backgroundLeve1)
                             .padding(horizontal = 16.dp),
                 ) {
                     ColumnItem(

@@ -19,14 +19,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.SettingOptions
 import com.tommy.siliconflow.app.data.getThemeTitle
 import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.ui.components.CustomTopBar
-import com.tommy.siliconflow.app.ui.theme.CommonColor
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.SettingViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -54,7 +53,7 @@ fun SettingScreen(
                 Modifier.padding(top = 16.dp, start = 18.dp, end = 18.dp)
                     .padding(innerPadding)
                     .clip(RoundedCornerShape(12.dp))
-                    .background(CommonColor.SettingLineBg),
+                    .background(AppTheme.colorScheme.backgroundLeve1),
         ) {
             Item(
                 stringResource(Res.string.setting_language),
@@ -86,13 +85,14 @@ private fun Item(title: String, content: String, click: () -> Unit) {
         Spacer(modifier = Modifier.weight(1f))
         Text(
             text = content,
-            color = Color.Gray,
+            color = AppTheme.colorScheme.tertiaryText,
             modifier = Modifier.padding(end = 8.dp)
         )
         Icon(
             painter = painterResource(Res.drawable.ic_arrow_forward),
             contentDescription = "forward",
-            modifier = Modifier.size(12.dp)
+            modifier = Modifier.size(12.dp),
+            tint = AppTheme.colorScheme.tertiaryText,
         )
     }
 }

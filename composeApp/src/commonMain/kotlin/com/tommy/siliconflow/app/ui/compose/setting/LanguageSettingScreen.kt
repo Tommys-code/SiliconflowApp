@@ -17,12 +17,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.Language
 import com.tommy.siliconflow.app.ui.components.CustomTopBar
-import com.tommy.siliconflow.app.ui.theme.CommonColor
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.SettingViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -44,7 +43,7 @@ fun LanguageSettingScreen(
         Column(
             modifier = Modifier.padding(top = 16.dp, start = 18.dp, end = 18.dp)
                 .padding(innerPadding).clip(RoundedCornerShape(12.dp))
-                .background(CommonColor.SettingLineBg),
+                .background(AppTheme.colorScheme.backgroundLeve1),
         ) {
             viewModel.allLanguages.forEachIndexed { index, it ->
                 LanguageItem(
@@ -87,7 +86,7 @@ internal fun LanguageItem(
                 Text(
                     it,
                     style = MaterialTheme.typography.labelLarge,
-                    color = Color.Gray,
+                    color = AppTheme.colorScheme.secondaryText,
                     modifier = Modifier.padding(top = 4.dp)
                 )
             }

@@ -16,7 +16,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.ui.components.CustomTopBar
-import com.tommy.siliconflow.app.ui.theme.CommonColor
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.ModelListViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -46,7 +46,8 @@ internal fun ModelListScreen(
                                 popBack()
                             }
                             .background(
-                                if (model == currentModel) CommonColor.TinyLightGray else Color.Transparent
+                                if (model == currentModel) AppTheme.colorScheme.backgroundLeve1
+                                else Color.Transparent
                             )
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp, vertical = 20.dp)

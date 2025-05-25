@@ -25,7 +25,12 @@ fun MainNavigation() {
     val navController = rememberNavController()
     NavHost(navController, startDestination = AppScreen.Splash) {
         composable<AppScreen.Splash> { SplashScreen({ navController.navigateAndPopBackStack(it) }) }
-        composable<AppScreen.Login> { LoginScreen({ navController.navigateAndPopBackStack(it) }) }
+        composable<AppScreen.Login> {
+            LoginScreen(
+                { navController.navigate(it) },
+                { navController.navigateAndPopBackStack(it) },
+            )
+        }
         composable<AppScreen.Main> { MainScreen { navController.navigate(it) } }
         composable<AppScreen.PersonalInfo> {
             UserInfoScreen(
