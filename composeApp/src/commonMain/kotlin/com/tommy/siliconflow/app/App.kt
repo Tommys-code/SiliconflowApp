@@ -7,6 +7,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.navigation.MainNavigation
 import com.tommy.siliconflow.app.platform.LocalAppLocale
 import com.tommy.siliconflow.app.ui.theme.AppTheme
+import com.tommy.siliconflow.app.ui.theme.darkCustomColorScheme
+import com.tommy.siliconflow.app.ui.theme.lightCustomColorScheme
 import com.tommy.siliconflow.app.viewmodel.AppViewModel
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -14,9 +16,7 @@ import org.koin.compose.viewmodel.koinViewModel
 internal fun App() {
     val viewModel = koinViewModel<AppViewModel>()
     AppEnvironment(viewModel) {
-        AppTheme {
-            MainNavigation()
-        }
+        MainNavigation()
     }
 }
 
@@ -27,7 +27,10 @@ private fun AppEnvironment(viewModel: AppViewModel, content: @Composable () -> U
         LocalAppLocale provides settingOptions?.language?.value,
     ) {
         key(settingOptions?.language) {
-            content()
+            // TODO temporary change to dark mode change it
+            AppTheme(if (settingOptions?.isDarkMode == true) darkCustomColorScheme() else lightCustomColorScheme()) {
+                content()
+            }
         }
     }
 }

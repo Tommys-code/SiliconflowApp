@@ -39,7 +39,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -55,7 +54,8 @@ import com.tommy.siliconflow.app.data.network.UserInfo
 import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.NormalButton
-import com.tommy.siliconflow.app.ui.theme.CommonColor
+import com.tommy.siliconflow.app.ui.theme.AppColor
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.MainViewEvent
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -82,13 +82,17 @@ internal fun DrawerContent(
     val popupSession = viewModel.mainViewState.popupSession.collectAsStateWithLifecycle(null).value
     val selection = viewModel.mainViewState.selectSessions.collectAsStateWithLifecycle().value
     Column(
-        modifier = modifier.fillMaxHeight().fillMaxWidth(0.7f).background(Color.White)
+        modifier = modifier
+            .fillMaxHeight()
+            .fillMaxWidth(0.7f)
+            .background(MaterialTheme.colorScheme.background)
             .safeContentPadding(),
     ) {
         Text(
             stringResource(Res.string.title),
             style = MaterialTheme.typography.titleLarge,
-            modifier = Modifier.padding(vertical = 20.dp, horizontal = 12.dp)
+            modifier = Modifier.padding(vertical = 20.dp, horizontal = 12.dp),
+            color = AppTheme.colorScheme.primaryText,
         )
         HorizontalDivider()
         DrawerCenterList(sessionList, currentSession, popupSession, selection, postEvent)
@@ -121,20 +125,19 @@ private fun ColumnScope.DrawerCenterList(
                 },
                 shape = RoundedCornerShape(size = 10.dp),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = CommonColor.LightGray
+                    containerColor = AppTheme.colorScheme.backgroundLeve1,
+                    contentColor = AppTheme.colorScheme.primaryText,
                 ),
-                modifier = Modifier.fillMaxWidth().height(48.dp)
-                    .padding(start = 6.dp, end = 6.dp, top = 8.dp, bottom = 2.dp),
+                modifier = Modifier.fillMaxWidth().height(56.dp)
+                    .padding(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 2.dp),
             ) {
                 Icon(
                     painterResource(Res.drawable.ic_circle_add),
                     modifier = Modifier.padding(end = 8.dp).size(24.dp),
-                    tint = Color.Black,
                     contentDescription = "add",
                 )
                 Text(
                     stringResource(Res.string.create_new_session),
-                    color = Color.Black,
                     style = MaterialTheme.typography.bodyLarge.copy(fontSize = 15.sp),
                 )
             }
@@ -146,44 +149,52 @@ private fun ColumnScope.DrawerCenterList(
         itemsIndexed(sessionList) { index, data ->
             var itemCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
             val background = if (currentSession == data) {
-                CommonColor.LightGray
+                AppTheme.colorScheme.container
             } else if (popupSession == data) {
-                CommonColor.TinyLightGray
+                AppTheme.colorScheme.backgroundLeve1
             } else {
-                Color.Transparent
+                AppColor.Transparent
             }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 6.dp)
+                    .padding(horizontal = 12.dp)
+                    .padding(top = 4.dp)
                     .onGloballyPositioned { itemCoordinates = it }
-                    .pointerInput(key1 = data.title) {
+                    .pointerInput(key1 = data.title, key2 = selectSessions) {
                         detectTapGestures(
                             onLongPress = { offset ->
-                                val windowOffset = itemCoordinates?.localToWindow(offset)?.round()
-                                    ?: IntOffset(0, 0)
+                                val windowOffset =
+                                    itemCoordinates?.localToWindow(offset)?.round()
+                                        ?: IntOffset(0, 0)
                                 doEvent(MainViewEvent.ShowPopup(data, windowOffset))
                             },
                             onTap = { _ ->
-                                doEvent.invoke(MainViewEvent.ChangeSession(data))
-                                doEvent.invoke(MainViewEvent.ToggleDrawer(coroutineScope))
+                                if (selectSessions == null) {
+                                    doEvent.invoke(MainViewEvent.ChangeSession(data))
+                                    doEvent.invoke(MainViewEvent.ToggleDrawer(coroutineScope))
+                                } else {
+                                    doEvent.invoke(MainViewEvent.SessionCheck(data))
+                                }
                             },
                         )
                     }
                     .clip(RoundedCornerShape(size = 10.dp))
                     .background(background)
-                    .padding(horizontal = 8.dp, vertical = 12.dp),
+                    .padding(horizontal = 12.dp, vertical = 12.dp),
             ) {
                 Text(
                     data.title,
                     style = MaterialTheme.typography.bodyLarge,
                     fontWeight = if (currentSession == data) FontWeight.Bold else FontWeight.Normal,
                     modifier = Modifier.weight(1f),
+                    color = AppTheme.colorScheme.primaryText,
                 )
                 selectSessions?.let {
                     Checkbox(
                         checked = it.contains(data),
                         modifier = Modifier.size(24.dp),
+                        colors = AppTheme.checkBoxDefaultColor,
                         onCheckedChange = {
                             doEvent.invoke(MainViewEvent.SessionCheck(data))
                         },
@@ -223,6 +234,7 @@ private fun DrawerBottom(
                 )
                 Text(
                     userInfo?.name.orEmpty(),
+                    color = AppTheme.colorScheme.primaryText,
                 )
             }
             Spacer(modifier = Modifier.weight(1f))
@@ -231,7 +243,8 @@ private fun DrawerBottom(
                 contentDescription = "setting",
                 modifier = Modifier.clickable {
                     doEvent.invoke(MainViewEvent.Navigate(AppScreen.SettingGraph))
-                }
+                },
+                tint = AppTheme.colorScheme.primaryText,
             )
         }
     }
@@ -249,6 +262,7 @@ private fun RowScope.MulSelectionBottom(
         onCheckedChange = {
             doEvent.invoke(MainViewEvent.CheckAll)
         },
+        colors = AppTheme.checkBoxDefaultColor,
         modifier = Modifier.size(24.dp),
     )
     Box(
@@ -258,17 +272,16 @@ private fun RowScope.MulSelectionBottom(
     ) {
         Text(
             stringResource(Res.string.select_all),
-            modifier = Modifier.padding(horizontal = 8.dp)
+            modifier = Modifier.padding(horizontal = 8.dp),
+            color = AppTheme.colorScheme.primaryText,
         )
     }
     Spacer(modifier = Modifier.weight(1f))
     NormalButton(
         res = Res.string.cancel,
-        border = BorderStroke(0.5.dp, Color.Gray),
+        border = BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
         contentPadding = PaddingValues(horizontal = 12.dp),
-        color = ButtonDefaults.buttonColors(
-            containerColor = Color.Transparent,
-        ),
+        color = ButtonDefaults.buttonColors(containerColor = AppColor.Transparent),
         onClick = {
             doEvent.invoke(MainViewEvent.MultipleSelectionMode(false))
         },
@@ -280,21 +293,15 @@ private fun RowScope.MulSelectionBottom(
         else
             stringResource(Res.string.delete),
         contentPadding = PaddingValues(horizontal = 12.dp),
+        textColor = AppColor.White,
         color = ButtonDefaults.buttonColors(
-            containerColor = Color.Red,
-            disabledContainerColor = CommonColor.LightRed,
+            containerColor = AppTheme.colorScheme.highlight,
+            disabledContainerColor = AppTheme.colorScheme.highlight.copy(alpha = 0.7f),
         ),
         enable = size > 0,
-        textColor = Color.White,
         onClick = {
             selectSessions?.let {
-                doEvent.invoke(
-                    MainViewEvent.ShowOrHideDialog(
-                        MainDialog.DeleteSessions(
-                            it
-                        )
-                    )
-                )
+                doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.DeleteSessions(it)))
             }
         },
     )

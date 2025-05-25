@@ -42,7 +42,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -61,7 +60,8 @@ import com.tommy.siliconflow.app.ui.components.SilMarkDown
 import com.tommy.siliconflow.app.ui.dialog.ChatPopup
 import com.tommy.siliconflow.app.ui.dialog.ChatPopupState
 import com.tommy.siliconflow.app.ui.dialog.ChatType
-import com.tommy.siliconflow.app.ui.theme.CommonColor
+import com.tommy.siliconflow.app.ui.theme.AppColor
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
@@ -122,7 +122,7 @@ internal fun ChatView(
                         .align(Alignment.BottomCenter)
                         .shadow(elevation = 5.dp, shape = CircleShape, clip = false)
                         .clip(CircleShape)
-                        .background(Color.White)
+                        .background(AppTheme.colorScheme.popContainer)
                         .padding(top = 4.dp)
                         .clickable { scope.launch { listState.scrollToItem(0) } },
                 )
@@ -130,7 +130,7 @@ internal fun ChatView(
         }
         Card(
             modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
-            border = BorderStroke(1.dp, Color.Gray)
+            border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         ) {
             Row {
                 TextField(
@@ -139,8 +139,8 @@ internal fun ChatView(
                     maxLines = 4,
                     label = { Text(stringResource(Res.string.enter_question)) },
                     colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
+                        focusedIndicatorColor = AppColor.Transparent,
+                        unfocusedIndicatorColor = AppColor.Transparent,
                     ),
                     keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
                     onValueChange = { text = it },
@@ -158,8 +158,9 @@ internal fun ChatView(
                         .clip(CircleShape)
                         .size(30.dp),
                     colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = Color.Black,
-                        disabledContainerColor = Color.Gray,
+                        containerColor = AppTheme.colorScheme.iconContainer,
+                        disabledContainerColor = AppTheme.colorScheme.iconContainerDisable,
+                        contentColor = AppTheme.colorScheme.icon,
                     ),
                     enabled = text.text.isNotBlank() && localAnswer.value !is ChatResult.Progress,
                     onClick = {
@@ -173,7 +174,6 @@ internal fun ChatView(
                     Icon(
                         modifier = Modifier.size(16.dp).rotate(270f),
                         painter = painterResource(Res.drawable.ic_send),
-                        tint = Color.White,
                         contentDescription = "send",
                     )
                 }
@@ -196,12 +196,13 @@ private fun ThinkingText(
     state: State,
     modifier: Modifier = Modifier
 ) {
-    Row(modifier = modifier.height(IntrinsicSize.Min).padding(bottom = 20.dp)) {
+    Row(modifier = modifier.height(IntrinsicSize.Min).padding(bottom = 12.dp)) {
         VerticalDivider(modifier.fillMaxHeight())
         SilMarkDown(
             state = state,
             modifier = modifier.padding(start = 12.dp),
-            paragraphStyle = MaterialTheme.typography.bodySmall,
+            paragraphStyle = MaterialTheme.typography.bodyMedium,
+            textColor = AppTheme.colorScheme.secondaryText,
         )
     }
 }
@@ -279,7 +280,7 @@ private fun ChatBox(chat: MarkdownChatHistory, popupState: MutableState<ChatPopu
                             bottomStart = 12.dp,
                         )
                     )
-                    .background(CommonColor.ChatBoxBg)
+                    .background(AppTheme.colorScheme.container)
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 style = MaterialTheme.typography.bodyLarge,
             )

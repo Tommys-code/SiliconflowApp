@@ -1,13 +1,15 @@
 package com.tommy.siliconflow.app.ui.dialog
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -25,6 +27,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.SessionPopupState
 import com.tommy.siliconflow.app.extensions.popupPosition
+import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.MainViewEvent
 import kotlinx.coroutines.flow.StateFlow
 import org.jetbrains.compose.resources.StringResource
@@ -58,12 +61,13 @@ internal fun SessionPopup(
             Column(
                 modifier = Modifier
                     .shadow(elevation = 5.dp, shape = RoundedCornerShape(12.dp))
-                    .width(100.dp)
-                    .background(Color.White)
+                    .width(IntrinsicSize.Max)
+                    .background(AppTheme.colorScheme.popContainer)
                     .padding(vertical = 8.dp),
             ) {
                 PopupItem(Res.string.mul_select, doEvent) {
                     doEvent.invoke(MainViewEvent.MultipleSelectionMode(true))
+                    doEvent.invoke(MainViewEvent.SessionCheck(state.session))
                 }
                 HorizontalDivider(
                     thickness = 0.5.dp,
@@ -72,7 +76,7 @@ internal fun SessionPopup(
                 PopupItem(Res.string.edit_session_name, doEvent) {
                     doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.EditSessionName(state.session)))
                 }
-                PopupItem(Res.string.delete, doEvent) {
+                PopupItem(Res.string.delete, doEvent, color = AppTheme.colorScheme.highlight) {
                     doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.DeleteSession(state.session)))
                 }
             }
@@ -84,13 +88,22 @@ internal fun SessionPopup(
 private fun PopupItem(
     resource: StringResource,
     doEvent: (MainViewEvent) -> Unit,
+    color: Color = Color.Unspecified,
     click: () -> Unit = {},
 ) {
-    Text(
-        stringResource(resource),
-        modifier = Modifier.clickable {
+    DropdownMenuItem(
+        text = {
+            Text(
+                stringResource(resource),
+                style = MaterialTheme.typography.bodyLarge,
+                color = color,
+            )
+        },
+        modifier = Modifier.widthIn(min = 100.dp)
+            .padding(vertical = 8.dp, horizontal = 12.dp),
+        onClick = {
             doEvent.invoke(MainViewEvent.DismissPopup)
             click()
-        }.fillMaxWidth().padding(vertical = 8.dp, horizontal = 12.dp)
+        }
     )
 }

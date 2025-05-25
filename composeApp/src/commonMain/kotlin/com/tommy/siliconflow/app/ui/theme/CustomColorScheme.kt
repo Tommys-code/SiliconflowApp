@@ -11,20 +11,69 @@ val LocalCustomColorScheme = staticCompositionLocalOf { lightCustomColorScheme()
 
 @Immutable
 class CustomColorScheme(
-    val sendChatContainer: Color,
+    val backgroundLeve1: Color,
+    val container: Color,
+    val cardContainer: Color,
+    val popContainer: Color,
+    val primaryText: Color,
+    val secondaryText: Color,
+    val icon: Color,
+    val iconContainer: Color,
+    val iconContainerDisable: Color = Color.LightGray,
+    val highlight: Color,
     val colorScheme: ColorScheme,
 )
 
 fun lightCustomColorScheme(
-    sendChatContainer: Color = Color.Black
+    backgroundLeve1: Color = AppColor.BackgroundLevel1,
+    container: Color = AppColor.Container,
+    cardContainer: Color = AppColor.CardContainer,
+    popContainer: Color = AppColor.PopContainer,
+    primaryText: Color = AppColor.PrimaryText,
+    secondaryText: Color = AppColor.SecondaryText,
+    icon: Color = AppColor.Icon,
+    iconContainer: Color = AppColor.IconContainer,
+    highlight: Color = AppColor.Highlight,
 ) = CustomColorScheme(
-    sendChatContainer = sendChatContainer,
-    colorScheme = lightColorScheme()
+    backgroundLeve1 = backgroundLeve1,
+    container = container,
+    cardContainer = cardContainer,
+    popContainer = popContainer,
+    primaryText = primaryText,
+    secondaryText = secondaryText,
+    icon = icon,
+    iconContainer = iconContainer,
+    highlight = highlight,
+    colorScheme = lightColorScheme(
+        background = AppColor.Background,
+        surface = AppColor.Background,
+        surfaceContainerHighest = cardContainer,
+    )
 )
 
 fun darkCustomColorScheme(
-    sendChatContainer: Color = Color.White
+    backgroundLeve1: Color = AppDarkColor.BackgroundLevel1,
+    container: Color = AppDarkColor.Container,
+    cardContainer: Color = AppDarkColor.CardContainer,
+    popContainer: Color = AppDarkColor.PopContainer,
+    primaryText: Color = AppDarkColor.PrimaryText,
+    secondaryText: Color = AppDarkColor.SecondaryText,
+    icon: Color = AppDarkColor.Icon,
+    iconContainer: Color = AppDarkColor.IconContainer,
+    highlight: Color = AppDarkColor.Highlight,
 ) = CustomColorScheme(
-    sendChatContainer = sendChatContainer,
-    colorScheme = darkColorScheme()
+    backgroundLeve1 = backgroundLeve1,
+    container = container,
+    cardContainer = cardContainer,
+    popContainer = popContainer,
+    primaryText = primaryText,
+    secondaryText = secondaryText,
+    icon = icon,
+    iconContainer = iconContainer,
+    highlight = highlight,
+    colorScheme = darkColorScheme(
+        background = AppDarkColor.Background,
+        surface = AppDarkColor.Background,
+        surfaceContainerHighest = cardContainer,
+    )
 )
