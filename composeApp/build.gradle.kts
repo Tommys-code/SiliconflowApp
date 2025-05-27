@@ -116,3 +116,8 @@ dependencies {
 room {
     schemaDirectory("$projectDir/schemas")
 }
+
+tasks.register<ExcelToJsonTask>("excelModelToJson") {
+    inputFile.set(project.layout.projectDirectory.file("model/model.xlsx"))
+    outputFile.set(project.layout.projectDirectory.file("src/commonMain/composeResources/files/model.json"))
+}
