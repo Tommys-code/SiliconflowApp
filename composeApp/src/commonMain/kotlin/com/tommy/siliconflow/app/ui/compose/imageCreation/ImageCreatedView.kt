@@ -4,6 +4,7 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,7 +42,10 @@ fun ImageCreatedView(imageData: ImageData, ratio: String, modifier: Modifier = M
         modifier = modifier.fillMaxWidth(),
     ) {
         val imageRatio = ImageRatio.fromValue(ratio)
-        LazyRow(modifier = Modifier.fillMaxWidth()) {
+        LazyRow(
+            modifier = Modifier.fillMaxWidth(),
+            contentPadding = PaddingValues(horizontal = 12.dp),
+        ) {
             items(imageData.urls) {
                 ImageItem(
                     it,

@@ -24,6 +24,7 @@ sealed class ImageCreationEvent {
     data class Creation(val prompt: String) : ImageCreationEvent()
     data class UpdateRatio(val ratio: ImageRatio) : ImageCreationEvent()
     data class UpdateBatchSize(val size: Int) : ImageCreationEvent()
+    data object ScrollTOBottom : ImageCreationEvent()
 }
 
 class ImageCreationViewModel(
@@ -32,7 +33,7 @@ class ImageCreationViewModel(
 ) : ViewModel() {
 
     private val _viewEvent = MutableSharedFlow<ImageCreationEvent>()
-    private val viewEvent: SharedFlow<ImageCreationEvent> = _viewEvent
+    val viewEvent: SharedFlow<ImageCreationEvent> = _viewEvent
 
     private val currentSession = MutableStateFlow<Session?>(null)
     val imageCreationData = repository.imageCreationData
@@ -59,6 +60,7 @@ class ImageCreationViewModel(
                     is ImageCreationEvent.Creation -> createImage(it.prompt)
                     is ImageCreationEvent.UpdateRatio -> updateRatio(it.ratio)
                     is ImageCreationEvent.UpdateBatchSize -> updateBatchSize(it.size)
+                    ImageCreationEvent.ScrollTOBottom -> {}
                 }
             }
         }

@@ -165,6 +165,7 @@ internal fun ChatView(
                     enabled = text.text.isNotBlank() && localAnswer.value !is ChatResult.Progress,
                     onClick = {
                         if (text.text.isNotBlank()) {
+                            scope.launch { listState.scrollToItem(0) }
                             focusManager.clearFocus()
                             viewModel.sendData(text.text)
                             text = TextFieldValue("")

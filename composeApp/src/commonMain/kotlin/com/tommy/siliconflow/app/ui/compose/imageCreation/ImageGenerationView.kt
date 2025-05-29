@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.ui.compose.imageCreation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -29,6 +31,7 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -37,6 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
@@ -58,11 +62,14 @@ import com.tommy.siliconflow.app.ui.theme.AppColor
 import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.ImageCreationEvent
 import com.tommy.siliconflow.app.viewmodel.ImageCreationViewModel
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.ic_arrow_down
 import siliconflowapp.composeapp.generated.resources.ic_send
 import siliconflowapp.composeapp.generated.resources.image_creation_hilt
 import siliconflowapp.composeapp.generated.resources.image_creation_size
@@ -78,24 +85,53 @@ fun ImageGenerationView(
     val createResult = viewModel.createResult.collectAsStateWithLifecycle().value
     val creationData =
         viewModel.imageCreationData.collectAsStateWithLifecycle(ImageCreationData()).value
+
+    val listState = rememberLazyListState()
+
     Column(modifier = modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.weight(1f),
-            reverseLayout = true,
-        ) {
-            creationLoadingView(createResult)
-            items(history) {
-                it.image?.let { img ->
-                    ImageCreatedView(
-                        img,
-                        it.ratio,
-                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
-                    )
+        Box(Modifier.fillMaxWidth().weight(1f)) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                reverseLayout = true,
+                state = listState,
+            ) {
+                creationLoadingView(createResult)
+                items(history) {
+                    it.image?.let { img ->
+                        ImageCreatedView(
+                            img,
+                            it.ratio,
+                            modifier = Modifier.padding(bottom = 12.dp)
+                        )
+                    }
+                    PromptView(it.prompt)
                 }
-                PromptView(it.prompt)
+            }
+
+            if (listState.canScrollBackward) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_arrow_down),
+                    contentDescription = "scroll",
+                    modifier = Modifier.padding(bottom = 24.dp)
+                        .size(36.dp)
+                        .align(Alignment.BottomCenter)
+                        .shadow(elevation = 5.dp, shape = CircleShape, clip = false)
+                        .clip(CircleShape)
+                        .background(AppTheme.colorScheme.popContainer)
+                        .padding(top = 4.dp)
+                        .clickable { viewModel.doEvent(ImageCreationEvent.ScrollTOBottom) },
+                )
             }
         }
         ImageCreationView(creationData) { viewModel.doEvent(it) }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.viewEvent.collectLatest {
+            if (it == ImageCreationEvent.ScrollTOBottom) {
+                listState.scrollToItem(0)
+            }
+        }
     }
 }
 
@@ -210,6 +246,7 @@ private fun ImageCreationView(
                 enabled = text.text.isNotBlank(),
                 onClick = {
                     if (text.text.isNotBlank()) {
+                        doEvent.invoke(ImageCreationEvent.ScrollTOBottom)
                         focusManager.clearFocus()
                         doEvent.invoke(ImageCreationEvent.Creation(text.text))
                         text = TextFieldValue("")
