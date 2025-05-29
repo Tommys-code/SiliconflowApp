@@ -13,10 +13,16 @@ fun IntOffset.popupPosition(
     } else {
         this.x + offset.x
     }
-    val y: Int = if(this.y + popupContentSize.height + offset.y > windowSize.height) {
+    val y: Int = if (this.y + popupContentSize.height + offset.y > windowSize.height) {
         this.y - popupContentSize.height
     } else {
         this.y + offset.y
     }
     return IntOffset(x, y)
+}
+
+fun IntOffset.topPosition(
+    popupContentSize: IntSize
+): IntOffset {
+    return IntOffset(this.x, y - popupContentSize.height)
 }

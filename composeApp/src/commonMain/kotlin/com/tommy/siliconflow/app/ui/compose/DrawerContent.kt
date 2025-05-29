@@ -51,7 +51,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.data.db.SessionType
 import com.tommy.siliconflow.app.data.network.UserInfo
+import com.tommy.siliconflow.app.extensions.getSessionIcon
 import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.NormalButton
@@ -156,6 +158,7 @@ private fun ColumnScope.DrawerCenterList(
             } else {
                 AppColor.Transparent
             }
+
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -184,6 +187,13 @@ private fun ColumnScope.DrawerCenterList(
                     .background(background)
                     .padding(horizontal = 12.dp, vertical = 12.dp),
             ) {
+                Icon(
+                    painterResource(data.sessionType.getSessionIcon()),
+                    contentDescription = "type",
+                    tint = AppTheme.colorScheme.primaryText,
+                    modifier = Modifier.padding(end = 6.dp).size(20.dp)
+                        .align(Alignment.CenterVertically)
+                )
                 Text(
                     data.title,
                     style = MaterialTheme.typography.bodyMedium,

@@ -6,11 +6,14 @@ import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.MarkdownChatHistory
 import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory
-import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.data.db.Role
+import com.tommy.siliconflow.app.data.db.SessionType
 import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.network.ChoiceDelta
 import com.tommy.siliconflow.app.ui.components.parseMarkdown
+import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.ic_chat
+import siliconflowapp.composeapp.generated.resources.ic_image
 
 fun ChatContent.sendHistory(sessionID: Long, time: Long) = ChatHistory(
     sessionId = sessionID,
@@ -84,13 +87,7 @@ suspend fun ChatResult<ChoiceDelta>.toAnswerMarkdown(): ChatResult<AnswerMarkdow
     }
 }
 
-fun ImageCreationData.toImageCreationHistory(
-    sessionID: Long,
-    time: Long,
-) = ImageCreationHistory(
-    sessionId = sessionID,
-    createTime = time,
-    prompt = prompt,
-    ratio = imageRadio.value,
-    batchSize = batchSize
-)
+fun SessionType.getSessionIcon() = when (this) {
+    SessionType.CHAT -> Res.drawable.ic_chat
+    SessionType.IMAGE -> Res.drawable.ic_image
+}

@@ -1,16 +1,23 @@
 package com.tommy.siliconflow.app.ui.compose.imageCreation
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
@@ -27,13 +34,24 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tommy.siliconflow.app.data.ImageCreationData
+import com.tommy.siliconflow.app.data.Resource
+import com.tommy.siliconflow.app.ui.components.ThreeDotLoading
+import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopup
+import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopupState
 import com.tommy.siliconflow.app.ui.theme.AppColor
 import com.tommy.siliconflow.app.ui.theme.AppTheme
+import com.tommy.siliconflow.app.viewmodel.ImageCreationEvent
 import com.tommy.siliconflow.app.viewmodel.ImageCreationViewModel
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
@@ -42,6 +60,7 @@ import org.koin.core.parameter.parametersOf
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.ic_send
 import siliconflowapp.composeapp.generated.resources.image_creation_hilt
+import siliconflowapp.composeapp.generated.resources.ratio
 
 @Composable
 fun ImageGenerationView(
@@ -49,23 +68,89 @@ fun ImageGenerationView(
     modifier: Modifier = Modifier,
     viewModel: ImageCreationViewModel = koinViewModel(parameters = { parametersOf(sessionID) })
 ) {
-    Column(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.weight(1f)) {
-
+    val history = viewModel.history.collectAsStateWithLifecycle(emptyList()).value
+    val createResult = viewModel.createResult.collectAsStateWithLifecycle().value
+    val creationData = viewModel.imageCreationData.collectAsStateWithLifecycle().value
+    Column(modifier = modifier.fillMaxSize()) {
+        LazyColumn(modifier = Modifier.weight(1f), reverseLayout = true) {
+            creationLoadingView(createResult)
+            items(history) {
+                it.image?.let { img ->
+                    ImageCreatedView(
+                        img,
+                        it.ratio,
+                        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
+                    )
+                }
+                PromptView(it.prompt)
+            }
         }
-        ImageCreationView()
+        ImageCreationView(creationData) { viewModel.doEvent(it) }
+    }
+}
+
+private fun LazyListScope.creationLoadingView(result: Resource<Unit>) {
+    when (result) {
+        is Resource.Loading -> {
+            if (result.loading) {
+                item {
+                    ThreeDotLoading(modifier = Modifier.padding(16.dp))
+                }
+            }
+        }
+
+        else -> {}
     }
 }
 
 @Composable
-private fun ImageCreationView() {
+private fun PromptView(prompt: String) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth(),
+        contentAlignment = Alignment.CenterEnd,
+    ) {
+        Text(
+            prompt,
+            modifier = Modifier
+                .padding(bottom = 10.dp)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 12.dp,
+                        topEnd = 12.dp,
+                        bottomStart = 12.dp,
+                    )
+                )
+                .background(AppTheme.colorScheme.container)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+    }
+}
+
+@Composable
+private fun ImageCreationView(
+    data: ImageCreationData,
+    doEvent: (ImageCreationEvent) -> Unit
+) {
+    val popupState = remember { mutableStateOf<ImageRatioPopupState?>(null) }
     var text by remember { mutableStateOf(TextFieldValue("")) }
     val focusManager = LocalFocusManager.current
+    var position by remember { mutableStateOf(IntOffset.Zero) }
 
     Card(
-        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
+        modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
+            .onGloballyPositioned { coordinates ->
+                position = coordinates.localToWindow(Offset.Zero).round()
+            },
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)) {
+            ImageConfigItem(stringResource(Res.string.ratio, data.imageRadio.desc)) {
+                popupState.value = ImageRatioPopupState(offset = position, data.imageRadio)
+            }
+        }
+        HorizontalDivider(thickness = 0.5.dp)
         Row {
             TextField(
                 value = text,
@@ -100,7 +185,7 @@ private fun ImageCreationView() {
                 onClick = {
                     if (text.text.isNotBlank()) {
                         focusManager.clearFocus()
-//                        viewModel.sendData(text.text)
+                        doEvent.invoke(ImageCreationEvent.Creation(text.text))
                         text = TextFieldValue("")
                     }
                 },
@@ -113,4 +198,5 @@ private fun ImageCreationView() {
             }
         }
     }
+    ImageRatioPopup(popupState)
 }
