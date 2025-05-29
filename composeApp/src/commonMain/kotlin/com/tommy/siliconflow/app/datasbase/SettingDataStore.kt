@@ -4,6 +4,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.ImageRatio
@@ -25,6 +26,7 @@ private const val IS_DARK_MODE_NAME = "is_dark_mode"
 
 // image
 private const val IMAGE_RATIO_NAME = "image_ratio"
+private const val IMAGE_BATCH_SIZE_NAME = "image_batch_size"
 
 private const val DEFAULT_MODEL = "Qwen/Qwen3-8B"
 
@@ -53,7 +55,9 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
     private val languageName = stringPreferencesKey(LANGUAGE_NAME)
     private val useSystemThemeName = booleanPreferencesKey(USE_SYSTEM_THEME_NAME)
     private val isDarkModeName = booleanPreferencesKey(IS_DARK_MODE_NAME)
+
     private val ratioName = stringPreferencesKey(IMAGE_RATIO_NAME)
+    private val sizeName = intPreferencesKey(IMAGE_BATCH_SIZE_NAME)
 
     override fun getApiKey(): Flow<String?> {
         return dataStore.data.map { it[apiKeyName] }
@@ -120,7 +124,7 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
             ImageCreationData(
                 prompt = "",
                 imageRadio = ImageRatio.fromValue(it[ratioName]),
-                batchSize = 1,
+                batchSize = it[sizeName] ?: ImageCreationData.DEFAULT_BATCH_SIZE,
             )
         }
     }
@@ -128,6 +132,7 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
     override suspend fun setImageCreationData(data: ImageCreationData) {
         dataStore.edit {
             it[ratioName] = data.imageRadio.value
+            it[sizeName] = data.batchSize
         }
     }
 }

@@ -15,9 +15,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.round
 import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.db.ImageData
 import com.tommy.siliconflow.app.ui.components.ImageItem
@@ -50,15 +58,17 @@ fun ImageCreatedView(imageData: ImageData, ratio: String, modifier: Modifier = M
 @Composable
 internal fun ImageConfigItem(
     content: String,
-    onClick: () -> Unit,
+    onClick: (IntOffset) -> Unit,
 ) {
+    var position by remember { mutableStateOf(IntOffset.Zero) }
     Row(
         modifier = Modifier
             .border(
                 BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
                 RoundedCornerShape(10.dp)
             )
-            .clickable { onClick() }
+            .onGloballyPositioned { cor -> position = cor.localToWindow(Offset.Zero).round() }
+            .clickable { onClick(position) }
             .padding(horizontal = 12.dp, vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {

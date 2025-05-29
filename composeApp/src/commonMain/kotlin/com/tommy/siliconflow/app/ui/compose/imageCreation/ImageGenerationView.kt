@@ -4,9 +4,11 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
@@ -25,6 +27,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -49,6 +52,8 @@ import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.ui.components.ThreeDotLoading
 import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopup
 import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopupState
+import com.tommy.siliconflow.app.ui.dialog.ImageSizePopup
+import com.tommy.siliconflow.app.ui.dialog.ImageSizePopupState
 import com.tommy.siliconflow.app.ui.theme.AppColor
 import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.ImageCreationEvent
@@ -60,6 +65,7 @@ import org.koin.core.parameter.parametersOf
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.ic_send
 import siliconflowapp.composeapp.generated.resources.image_creation_hilt
+import siliconflowapp.composeapp.generated.resources.image_creation_size
 import siliconflowapp.composeapp.generated.resources.ratio
 
 @Composable
@@ -73,7 +79,10 @@ fun ImageGenerationView(
     val creationData =
         viewModel.imageCreationData.collectAsStateWithLifecycle(ImageCreationData()).value
     Column(modifier = modifier.fillMaxSize()) {
-        LazyColumn(modifier = Modifier.weight(1f), reverseLayout = true) {
+        LazyColumn(
+            modifier = Modifier.weight(1f),
+            reverseLayout = true,
+        ) {
             creationLoadingView(createResult)
             items(history) {
                 it.image?.let { img ->
@@ -135,6 +144,8 @@ private fun ImageCreationView(
     doEvent: (ImageCreationEvent) -> Unit
 ) {
     val popupState = remember { mutableStateOf<ImageRatioPopupState?>(null) }
+    val sizePopupState = remember { mutableStateOf<ImageSizePopupState?>(null) }
+
     var text by remember { mutableStateOf(TextFieldValue("")) }
     val focusManager = LocalFocusManager.current
     var position by remember { mutableStateOf(IntOffset.Zero) }
@@ -146,9 +157,23 @@ private fun ImageCreationView(
             },
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
     ) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 10.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(IntrinsicSize.Max)
+                .padding(horizontal = 12.dp, vertical = 10.dp)
+        ) {
             ImageConfigItem(stringResource(Res.string.ratio, data.imageRadio.desc)) {
-                popupState.value = ImageRatioPopupState(offset = position, data.imageRadio)
+                popupState.value =
+                    ImageRatioPopupState(offset = IntOffset(it.x, position.y), data.imageRadio)
+            }
+            VerticalDivider(
+                thickness = 0.5.dp,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+            ImageConfigItem(stringResource(Res.string.image_creation_size, data.batchSize)) {
+                sizePopupState.value =
+                    ImageSizePopupState(offset = IntOffset(it.x, position.y), data.batchSize)
             }
         }
         HorizontalDivider(thickness = 0.5.dp)
@@ -200,4 +225,5 @@ private fun ImageCreationView(
         }
     }
     ImageRatioPopup(popupState, doEvent)
+    ImageSizePopup(sizePopupState, doEvent)
 }

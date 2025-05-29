@@ -23,6 +23,7 @@ import kotlinx.coroutines.launch
 sealed class ImageCreationEvent {
     data class Creation(val prompt: String) : ImageCreationEvent()
     data class UpdateRatio(val ratio: ImageRatio) : ImageCreationEvent()
+    data class UpdateBatchSize(val size: Int) : ImageCreationEvent()
 }
 
 class ImageCreationViewModel(
@@ -57,6 +58,7 @@ class ImageCreationViewModel(
                 when (it) {
                     is ImageCreationEvent.Creation -> createImage(it.prompt)
                     is ImageCreationEvent.UpdateRatio -> updateRatio(it.ratio)
+                    is ImageCreationEvent.UpdateBatchSize -> updateBatchSize(it.size)
                 }
             }
         }
@@ -93,6 +95,14 @@ class ImageCreationViewModel(
         viewModelScope.launch {
             repository.saveImageCreationData(
                 imageCreationData.conflate().first().copy(imageRadio = ratio)
+            )
+        }
+    }
+
+    private fun updateBatchSize(size: Int) {
+        viewModelScope.launch {
+            repository.saveImageCreationData(
+                imageCreationData.conflate().first().copy(batchSize = size)
             )
         }
     }

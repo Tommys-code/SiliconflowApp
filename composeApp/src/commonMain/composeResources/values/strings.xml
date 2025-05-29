@@ -43,4 +43,5 @@
 
     <string name="ratio">比例 %1$s</string>
     <string name="image_creation_hilt">说说你的灵感...</string>
+    <string name="image_creation_size">生成数量 %1$d</string>
 </resources>
