@@ -34,7 +34,7 @@ class ModelStoreImpl(
 
     init {
         scope.launch {
-            Res.readBytes("files/text_model.json").decodeToString().let { data ->
+            Res.readBytes("files/model.json").decodeToString().let { data ->
                 JsonSerializationHelper.jsonX().decodeFromString<List<TextAIModel>>(data).map {
                     it.toLocalAIModel()
                 }

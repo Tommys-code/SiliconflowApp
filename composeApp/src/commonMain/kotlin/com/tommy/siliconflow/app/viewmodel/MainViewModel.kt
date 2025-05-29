@@ -9,7 +9,6 @@ import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.datasbase.ModelStore
 import com.tommy.siliconflow.app.extensions.toAnswerMarkdown
-import com.tommy.siliconflow.app.extensions.toMarkdownChatHistory
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.CoroutineScope
@@ -61,10 +60,7 @@ class MainViewModel(
 
     val sessionList = chatRepository.sessionList
     val currentSession = chatRepository.currentSession
-    @OptIn(ExperimentalCoroutinesApi::class)
-    val chatHistory = chatRepository.chatHistory.mapLatest {
-        it.map { chatHistory -> chatHistory.toMarkdownChatHistory() }
-    }
+    val chatHistory = chatRepository.chatHistory
     @OptIn(ExperimentalCoroutinesApi::class)
     val answer = chatRepository.answer.buffer(0, BufferOverflow.DROP_OLDEST).mapLatest {
         it?.toAnswerMarkdown()

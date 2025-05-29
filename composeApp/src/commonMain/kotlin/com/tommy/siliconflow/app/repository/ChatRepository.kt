@@ -1,6 +1,7 @@
 package com.tommy.siliconflow.app.repository
 
 import com.tommy.siliconflow.app.data.ChatResult
+import com.tommy.siliconflow.app.data.MarkdownChatHistory
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
@@ -12,10 +13,10 @@ import com.tommy.siliconflow.app.datasbase.SettingDataStore
 import com.tommy.siliconflow.app.extensions.appendContent
 import com.tommy.siliconflow.app.extensions.toChatContent
 import com.tommy.siliconflow.app.extensions.toChatContentResult
+import com.tommy.siliconflow.app.extensions.toMarkdownChatHistory
 import com.tommy.siliconflow.app.network.service.SSEService
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -24,6 +25,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 
 class ChatRepository(
@@ -47,8 +49,12 @@ class ChatRepository(
     val answer: StateFlow<ChatResult<ChoiceDelta>?> = _answer
 
     @OptIn(ExperimentalCoroutinesApi::class)
-    val chatHistory: Flow<List<ChatHistory>> = currentSession.flatMapLatest { session ->
+    val chatHistory: Flow<List<MarkdownChatHistory>> = currentSession.flatMapLatest { session ->
         session?.let { chatHistoryStore.getChatHistory(it.id) } ?: flowOf(emptyList())
+    }.mapLatest {
+        it.map { chatHistory ->
+            chatHistory.toMarkdownChatHistory().apply { _answer.emit(null) }
+        }
     }
 
     init {
@@ -101,9 +107,7 @@ class ChatRepository(
                     _answer.emit(ChatResult.Progress(it.appendContent(cur.data)))
                 }
             } else if (cur is ChatResult.Finish) {
-                // parse markdown need time, delay to ensure the UI is updated
-                delay(500)
-                _answer.emit(cur)
+                // mark down parse need time, so move to parse finish to emit finish, otherwise it makes UI flicker
             } else {
                 _answer.emit(cur)
             }
