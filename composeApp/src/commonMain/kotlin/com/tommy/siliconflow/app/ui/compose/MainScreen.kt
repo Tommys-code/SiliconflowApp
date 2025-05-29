@@ -33,6 +33,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.ic_circle_add
 import siliconflowapp.composeapp.generated.resources.ic_dehaze
 import siliconflowapp.composeapp.generated.resources.ic_drop_down
 
@@ -87,18 +88,29 @@ private fun HomeTopAppBar(
     doEvent: (MainViewEvent) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    CenterAlignedTopAppBar(title = {
-        model?.let {
-            TitleView(it.model, doEvent)
+    CenterAlignedTopAppBar(
+        title = {
+            model?.let {
+                TitleView(it.model, doEvent)
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = { doEvent(MainViewEvent.ToggleDrawer(coroutineScope)) }) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_dehaze),
+                    contentDescription = "drawer",
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = { doEvent(MainViewEvent.Navigate(AppScreen.ImageCreation(null))) }) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_circle_add),
+                    contentDescription = "add"
+                )
+            }
         }
-    }, navigationIcon = {
-        IconButton(onClick = { doEvent(MainViewEvent.ToggleDrawer(coroutineScope)) }) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_dehaze),
-                contentDescription = "drawer",
-            )
-        }
-    })
+    )
 }
 
 @Composable

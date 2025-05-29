@@ -1,12 +1,17 @@
 package com.tommy.siliconflow.app.network.service
 
+import com.tommy.siliconflow.app.data.network.ImageGenerationsRequest
+import com.tommy.siliconflow.app.data.network.ImageGenerationsResponse
 import com.tommy.siliconflow.app.data.network.UserInfoResponse
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.bearerAuth
 import io.ktor.client.request.get
+import io.ktor.client.request.post
+import io.ktor.client.request.setBody
 
 private const val USER_INFO_URL = "user/info"
+private const val IMAGE_GENERATIONS_URL = "image/generations"
 
 class SiliconFlowService(private val unAuthClient: HttpClient, private val authClient: HttpClient) {
     suspend fun getUserInfo(apiKey: String): UserInfoResponse {
@@ -15,7 +20,10 @@ class SiliconFlowService(private val unAuthClient: HttpClient, private val authC
         }.body<UserInfoResponse>()
     }
 
-//    suspend fun getUserInfo(): UserInfoResponse {
-//        return client.get(USER_INFO_URL).body<UserInfoResponse>()
-//    }
+    suspend fun imageGenerations(request: ImageGenerationsRequest): ImageGenerationsResponse {
+        return authClient.post(IMAGE_GENERATIONS_URL) {
+            setBody(request)
+        }.body<ImageGenerationsResponse>()
+    }
+
 }

@@ -2,6 +2,8 @@ package com.tommy.siliconflow.app.di
 
 import com.tommy.siliconflow.app.datasbase.ChatHistoryStore
 import com.tommy.siliconflow.app.datasbase.ChatHistoryStoreImpl
+import com.tommy.siliconflow.app.datasbase.ImageCreationStore
+import com.tommy.siliconflow.app.datasbase.ImageCreationStoreImpl
 import com.tommy.siliconflow.app.datasbase.ModelStore
 import com.tommy.siliconflow.app.datasbase.ModelStoreImpl
 import com.tommy.siliconflow.app.datasbase.SettingDataStore
@@ -11,8 +13,10 @@ import com.tommy.siliconflow.app.network.SiliconFlowClient
 import com.tommy.siliconflow.app.network.service.SSEService
 import com.tommy.siliconflow.app.network.service.SiliconFlowService
 import com.tommy.siliconflow.app.repository.ChatRepository
+import com.tommy.siliconflow.app.repository.ImageCreationRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import com.tommy.siliconflow.app.viewmodel.AppViewModel
+import com.tommy.siliconflow.app.viewmodel.ImageCreationViewModel
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import com.tommy.siliconflow.app.viewmodel.LoginViewModel
 import com.tommy.siliconflow.app.viewmodel.ModelListViewModel
@@ -25,6 +29,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.SupervisorJob
 import org.koin.core.context.startKoin
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.core.qualifier.qualifier
 import org.koin.dsl.module
@@ -39,6 +44,7 @@ object KMMInject {
         single<SettingDataStore> { SettingDataStoreImpl(get()) }
         single<ChatHistoryStore> { ChatHistoryStoreImpl(get()) }
         single<ModelStore> { ModelStoreImpl(get(), get()) }
+        single<ImageCreationStore> { ImageCreationStoreImpl(get()) }
     }
 
     private val clientModule = module {
@@ -56,6 +62,7 @@ object KMMInject {
         single { SSEService(get(qualifier(SSE_CLIENT)), get()) }
         single { SiliconFlowRepository(get(), get()) }
         single { ChatRepository(get(), get(), get(), get()) }
+        single { ImageCreationRepository(get(), get(), get()) }
     }
 
     fun initKMM(factory: Factory) {
@@ -77,6 +84,7 @@ object KMMInject {
                     viewModelOf(::UserInfoViewModel)
                     viewModelOf(::ModelListViewModel)
                     viewModelOf(::SettingViewModel)
+                    viewModel { (sessionId: Long?) -> ImageCreationViewModel(get(), sessionId) }
                 }
             )
         }

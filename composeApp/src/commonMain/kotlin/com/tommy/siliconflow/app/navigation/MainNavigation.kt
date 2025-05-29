@@ -7,6 +7,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.navigation
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
+import androidx.savedstate.savedState
 import com.tommy.siliconflow.app.extensions.navigateAndClearAll
 import com.tommy.siliconflow.app.extensions.navigateAndPopBackStack
 import com.tommy.siliconflow.app.ui.compose.LoginScreen
@@ -14,6 +16,7 @@ import com.tommy.siliconflow.app.ui.compose.MainScreen
 import com.tommy.siliconflow.app.ui.compose.ModelListScreen
 import com.tommy.siliconflow.app.ui.compose.SplashScreen
 import com.tommy.siliconflow.app.ui.compose.UserInfoScreen
+import com.tommy.siliconflow.app.ui.compose.imageCreation.ImageCreationScreen
 import com.tommy.siliconflow.app.ui.compose.setting.LanguageSettingScreen
 import com.tommy.siliconflow.app.ui.compose.setting.SettingScreen
 import com.tommy.siliconflow.app.ui.compose.setting.ThemeScreen
@@ -47,6 +50,9 @@ fun MainNavigation() {
         }
         composable<AppScreen.ModelList> {
             ModelListScreen({ navController.popBackStack() })
+        }
+        composable<AppScreen.ImageCreation> {
+            ImageCreationScreen(it.toRoute<AppScreen.ImageCreation>().sessionID)
         }
         settingNavigation(navController)
     }

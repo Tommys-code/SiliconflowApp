@@ -2,9 +2,11 @@ package com.tommy.siliconflow.app.extensions
 
 import com.tommy.siliconflow.app.data.AnswerMarkdown
 import com.tommy.siliconflow.app.data.ChatResult
+import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.MarkdownChatHistory
 import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory
+import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.network.ChoiceDelta
@@ -81,3 +83,14 @@ suspend fun ChatResult<ChoiceDelta>.toAnswerMarkdown(): ChatResult<AnswerMarkdow
         )
     }
 }
+
+fun ImageCreationData.toImageCreationHistory(
+    sessionID: Long,
+    time: Long,
+) = ImageCreationHistory(
+    sessionId = sessionID,
+    createTime = time,
+    prompt = prompt,
+    ratio = imageRadio.value,
+    batchSize = batchSize
+)
