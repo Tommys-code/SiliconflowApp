@@ -11,11 +11,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Stable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.IntOffset
@@ -29,6 +31,7 @@ import androidx.compose.ui.window.PopupProperties
 import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.extensions.topPosition
 import com.tommy.siliconflow.app.ui.theme.AppTheme
+import com.tommy.siliconflow.app.viewmodel.ImageCreationEvent
 import org.jetbrains.compose.resources.painterResource
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.ic_check
@@ -40,7 +43,10 @@ data class ImageRatioPopupState(
 )
 
 @Composable
-fun ImageRatioPopup(state: MutableState<ImageRatioPopupState?>) {
+fun ImageRatioPopup(
+    state: MutableState<ImageRatioPopupState?>,
+    doEvent: (ImageCreationEvent) -> Unit,
+) {
     state.value?.let {
         Popup(
             onDismissRequest = { state.value = null },
@@ -62,8 +68,14 @@ fun ImageRatioPopup(state: MutableState<ImageRatioPopupState?>) {
                     .width(150.dp)
                     .background(AppTheme.colorScheme.popContainer),
             ) {
-                ImageRatio.entries.forEach { entry ->
-                    RatioItem(entry, entry == it.selected) {}
+                ImageRatio.entries.forEachIndexed { index, entry ->
+                    RatioItem(entry, entry == it.selected) {
+                        doEvent(ImageCreationEvent.UpdateRatio(entry))
+                        state.value = null
+                    }
+                    if (index != ImageRatio.entries.size - 1) {
+                        HorizontalDivider(thickness = 0.5.dp)
+                    }
                 }
             }
         }
@@ -75,12 +87,12 @@ private fun RatioItem(ratio: ImageRatio, isSelected: Boolean, onClick: () -> Uni
     DropdownMenuItem(
         text = { Text(ratio.desc) },
         leadingIcon = {
-            Box(modifier = Modifier.size(20.dp)) {
+            Box(modifier = Modifier.size(20.dp), contentAlignment = Alignment.Center) {
                 Box(
                     modifier = Modifier.border(
                         width = 2.dp,
                         color = AppTheme.colorScheme.iconContainer,
-                        shape = RoundedCornerShape(4.dp),
+                        shape = RoundedCornerShape(2.dp),
                     ).aspectRatio(ratio.size)
                 )
             }

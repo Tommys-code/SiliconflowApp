@@ -51,7 +51,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.db.Session
-import com.tommy.siliconflow.app.data.db.SessionType
 import com.tommy.siliconflow.app.data.network.UserInfo
 import com.tommy.siliconflow.app.extensions.getSessionIcon
 import com.tommy.siliconflow.app.navigation.AppScreen

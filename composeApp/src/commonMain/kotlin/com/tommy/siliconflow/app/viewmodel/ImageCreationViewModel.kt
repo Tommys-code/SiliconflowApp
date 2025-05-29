@@ -2,7 +2,7 @@ package com.tommy.siliconflow.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.tommy.siliconflow.app.data.ImageCreationData
+import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.data.db.Session
@@ -14,12 +14,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 sealed class ImageCreationEvent {
     data class Creation(val prompt: String) : ImageCreationEvent()
+    data class UpdateRatio(val ratio: ImageRatio) : ImageCreationEvent()
 }
 
 class ImageCreationViewModel(
@@ -28,11 +31,10 @@ class ImageCreationViewModel(
 ) : ViewModel() {
 
     private val _viewEvent = MutableSharedFlow<ImageCreationEvent>()
-    val viewEvent: SharedFlow<ImageCreationEvent> = _viewEvent
+    private val viewEvent: SharedFlow<ImageCreationEvent> = _viewEvent
 
     private val currentSession = MutableStateFlow<Session?>(null)
-    private val _imageCreationData = MutableStateFlow(ImageCreationData(prompt = ""))
-    val imageCreationData: StateFlow<ImageCreationData> = _imageCreationData
+    val imageCreationData = repository.imageCreationData
 
     private val _createResult = MutableStateFlow<Resource<Unit>>(Resource.init)
     val createResult: StateFlow<Resource<Unit>> = _createResult
@@ -54,6 +56,7 @@ class ImageCreationViewModel(
             viewEvent.collectLatest {
                 when (it) {
                     is ImageCreationEvent.Creation -> createImage(it.prompt)
+                    is ImageCreationEvent.UpdateRatio -> updateRatio(it.ratio)
                 }
             }
         }
@@ -61,18 +64,18 @@ class ImageCreationViewModel(
 
     private fun createImage(prompt: String) {
         viewModelScope.launch {
-            _imageCreationData.value = _imageCreationData.value.copy(prompt = prompt)
+            val data = imageCreationData.conflate().first().copy(prompt = prompt)
             val id: Long = currentSession.value?.let {
-                repository.insertHistory(it.id, imageCreationData.value)
+                repository.insertHistory(it.id, data)
             } ?: run {
-                repository.createSession(_imageCreationData.value.prompt).let {
+                repository.createSession(prompt).let {
                     currentSession.value = it
-                    repository.insertHistory(it.id, imageCreationData.value)
+                    repository.insertHistory(it.id, data)
                 }
             }
             runCatching {
                 _createResult.value = Resource.loading
-                repository.createImage(_imageCreationData.value)
+                repository.createImage(data)
             }.onSuccess {
                 repository.updateHistory(id, it)
                 _createResult.value = Resource.Success(Unit)
@@ -84,6 +87,14 @@ class ImageCreationViewModel(
 
     fun doEvent(event: ImageCreationEvent) {
         viewModelScope.launch { _viewEvent.emit(event) }
+    }
+
+    private fun updateRatio(ratio: ImageRatio) {
+        viewModelScope.launch {
+            repository.saveImageCreationData(
+                imageCreationData.conflate().first().copy(imageRadio = ratio)
+            )
+        }
     }
 
 }

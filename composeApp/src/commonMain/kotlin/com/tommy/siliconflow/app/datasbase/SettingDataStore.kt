@@ -5,6 +5,8 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import com.tommy.siliconflow.app.data.ImageCreationData
+import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.Language
 import com.tommy.siliconflow.app.data.SettingOptions
 import com.tommy.siliconflow.app.data.network.UserInfo
@@ -21,6 +23,9 @@ private const val LANGUAGE_NAME = "language"
 private const val USE_SYSTEM_THEME_NAME = "use_system_theme"
 private const val IS_DARK_MODE_NAME = "is_dark_mode"
 
+// image
+private const val IMAGE_RATIO_NAME = "image_ratio"
+
 private const val DEFAULT_MODEL = "Qwen/Qwen3-8B"
 
 interface SettingDataStore {
@@ -34,6 +39,9 @@ interface SettingDataStore {
     fun getSettingOptions(): Flow<SettingOptions>
     suspend fun saveLanguage(language: Language)
     suspend fun changeTheme(useSystem: Boolean = true, isDarkMode: Boolean? = null)
+
+    fun getImageCreationData(): Flow<ImageCreationData>
+    suspend fun setImageCreationData(data: ImageCreationData)
 }
 
 class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : SettingDataStore {
@@ -45,6 +53,7 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
     private val languageName = stringPreferencesKey(LANGUAGE_NAME)
     private val useSystemThemeName = booleanPreferencesKey(USE_SYSTEM_THEME_NAME)
     private val isDarkModeName = booleanPreferencesKey(IS_DARK_MODE_NAME)
+    private val ratioName = stringPreferencesKey(IMAGE_RATIO_NAME)
 
     override fun getApiKey(): Flow<String?> {
         return dataStore.data.map { it[apiKeyName] }
@@ -103,6 +112,22 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
         dataStore.edit { store ->
             store[useSystemThemeName] = useSystem
             isDarkMode?.let { store[isDarkModeName] = it }
+        }
+    }
+
+    override fun getImageCreationData(): Flow<ImageCreationData> {
+        return dataStore.data.map {
+            ImageCreationData(
+                prompt = "",
+                imageRadio = ImageRatio.fromValue(it[ratioName]),
+                batchSize = 1,
+            )
+        }
+    }
+
+    override suspend fun setImageCreationData(data: ImageCreationData) {
+        dataStore.edit {
+            it[ratioName] = data.imageRadio.value
         }
     }
 }

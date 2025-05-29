@@ -70,7 +70,8 @@ fun ImageGenerationView(
 ) {
     val history = viewModel.history.collectAsStateWithLifecycle(emptyList()).value
     val createResult = viewModel.createResult.collectAsStateWithLifecycle().value
-    val creationData = viewModel.imageCreationData.collectAsStateWithLifecycle().value
+    val creationData =
+        viewModel.imageCreationData.collectAsStateWithLifecycle(ImageCreationData()).value
     Column(modifier = modifier.fillMaxSize()) {
         LazyColumn(modifier = Modifier.weight(1f), reverseLayout = true) {
             creationLoadingView(createResult)
@@ -198,5 +199,5 @@ private fun ImageCreationView(
             }
         }
     }
-    ImageRatioPopup(popupState)
+    ImageRatioPopup(popupState, doEvent)
 }

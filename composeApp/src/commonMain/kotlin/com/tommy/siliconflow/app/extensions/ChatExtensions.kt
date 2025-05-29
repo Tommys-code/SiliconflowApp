@@ -2,7 +2,6 @@ package com.tommy.siliconflow.app.extensions
 
 import com.tommy.siliconflow.app.data.AnswerMarkdown
 import com.tommy.siliconflow.app.data.ChatResult
-import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.MarkdownChatHistory
 import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory

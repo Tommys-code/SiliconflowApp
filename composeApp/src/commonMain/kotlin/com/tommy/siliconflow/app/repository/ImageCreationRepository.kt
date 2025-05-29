@@ -14,10 +14,11 @@ import kotlinx.coroutines.flow.map
 class ImageCreationRepository(
     private val imageCreationStore: ImageCreationStore,
     private val service: SiliconFlowService,
-    settingDataStore: SettingDataStore,
+    private val settingDataStore: SettingDataStore,
 ) {
 
     private val useID = settingDataStore.getUserInfo().map { it?.id }
+    val imageCreationData = settingDataStore.getImageCreationData()
 
     suspend fun getSessionById(sessionID: Long) = imageCreationStore.getSession(sessionID)
 
@@ -45,4 +46,8 @@ class ImageCreationRepository(
         imageSize = imageRadio.value,
         batchSize = batchSize,
     )
+
+    suspend fun saveImageCreationData(data: ImageCreationData) {
+        settingDataStore.setImageCreationData(data)
+    }
 }
