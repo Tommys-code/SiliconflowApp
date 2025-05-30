@@ -24,6 +24,9 @@ sealed class AppScreen {
     data class ImageCreation(val sessionID: Long?) : AppScreen()
 
     @Serializable
+    data class ImagePreview(val urls: List<String>, val current: Int) : AppScreen()
+
+    @Serializable
     data object SettingGraph {
         @Serializable
         data object Setting : AppScreen()

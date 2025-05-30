@@ -62,6 +62,7 @@ kotlin {
             implementation(libs.androidx.room.runtime)
             implementation(libs.sqlite.bundled)
             implementation(libs.markdown)
+            implementation(libs.zoomable)
         }
         iosMain.dependencies {
             implementation(libs.ktor.client.darwin)

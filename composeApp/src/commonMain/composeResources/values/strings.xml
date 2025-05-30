@@ -41,6 +41,7 @@
     <string name="light_theme">Light Mode</string>
     <string name="dark_theme">Dark Mode</string>
 
+    <string name="image_creation_title">AI生图</string>
     <string name="ratio">比例 %1$s</string>
     <string name="image_creation_hilt">说说你的灵感...</string>
     <string name="image_creation_size">生成数量 %1$d</string>

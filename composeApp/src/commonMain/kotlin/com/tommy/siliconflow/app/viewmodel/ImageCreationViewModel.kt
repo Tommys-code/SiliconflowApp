@@ -6,6 +6,7 @@ import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.repository.ImageCreationRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 
 sealed class ImageCreationEvent {
+    data class Navigate(val route: AppScreen) : ImageCreationEvent()
     data class Creation(val prompt: String) : ImageCreationEvent()
     data class UpdateRatio(val ratio: ImageRatio) : ImageCreationEvent()
     data class UpdateBatchSize(val size: Int) : ImageCreationEvent()
@@ -61,6 +63,7 @@ class ImageCreationViewModel(
                     is ImageCreationEvent.UpdateRatio -> updateRatio(it.ratio)
                     is ImageCreationEvent.UpdateBatchSize -> updateBatchSize(it.size)
                     ImageCreationEvent.ScrollTOBottom -> {}
+                    is ImageCreationEvent.Navigate -> {}
                 }
             }
         }

@@ -16,6 +16,7 @@ import com.tommy.siliconflow.app.ui.compose.ModelListScreen
 import com.tommy.siliconflow.app.ui.compose.SplashScreen
 import com.tommy.siliconflow.app.ui.compose.UserInfoScreen
 import com.tommy.siliconflow.app.ui.compose.imageCreation.ImageCreationScreen
+import com.tommy.siliconflow.app.ui.compose.imageCreation.ImagePreviewScreen
 import com.tommy.siliconflow.app.ui.compose.setting.LanguageSettingScreen
 import com.tommy.siliconflow.app.ui.compose.setting.SettingScreen
 import com.tommy.siliconflow.app.ui.compose.setting.ThemeScreen
@@ -50,8 +51,16 @@ fun MainNavigation() {
         composable<AppScreen.ModelList> {
             ModelListScreen({ navController.popBackStack() })
         }
-        composable<AppScreen.ImageCreation> {
-            ImageCreationScreen(it.toRoute<AppScreen.ImageCreation>().sessionID) { navController.popBackStack() }
+        composable<AppScreen.ImageCreation> { navBackStackEntry ->
+            ImageCreationScreen(
+                navBackStackEntry.toRoute<AppScreen.ImageCreation>().sessionID,
+                popBack = { navController.popBackStack() },
+                navigateTo = { navController.navigate(it) },
+            )
+        }
+        composable<AppScreen.ImagePreview> {
+            val route = it.toRoute<AppScreen.ImagePreview>()
+            ImagePreviewScreen(route.urls, route.current) { navController.popBackStack() }
         }
         settingNavigation(navController)
     }

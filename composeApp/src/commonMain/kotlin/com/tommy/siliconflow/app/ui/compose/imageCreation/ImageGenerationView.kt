@@ -63,7 +63,6 @@ import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.ImageCreationEvent
 import com.tommy.siliconflow.app.viewmodel.ImageCreationViewModel
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -101,7 +100,8 @@ fun ImageGenerationView(
                         ImageCreatedView(
                             img,
                             it.ratio,
-                            modifier = Modifier.padding(bottom = 12.dp)
+                            modifier = Modifier.padding(bottom = 12.dp),
+                            doEvent = { event -> viewModel.doEvent(event) }
                         )
                     }
                     PromptView(it.prompt)
