@@ -40,6 +40,8 @@ private const val SSE_CLIENT = "sse_client"
 
 object KMMInject {
 
+    lateinit var factory: Factory
+
     private val storeModule = module {
         single<SettingDataStore> { SettingDataStoreImpl(get()) }
         single<ChatHistoryStore> { ChatHistoryStoreImpl(get()) }
@@ -66,6 +68,7 @@ object KMMInject {
     }
 
     fun initKMM(factory: Factory) {
+        this.factory = factory
         startKoin {
             modules(
                 module {
