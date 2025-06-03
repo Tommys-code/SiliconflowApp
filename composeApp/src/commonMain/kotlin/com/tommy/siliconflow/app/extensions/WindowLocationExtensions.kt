@@ -1,13 +1,14 @@
 package com.tommy.siliconflow.app.extensions
 
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 
-fun IntOffset.popupPosition(
+fun IntOffset.popupPosition(offset: IntOffset = IntOffset.Zero): (
+    anchorBounds: IntRect,
     windowSize: IntSize,
     popupContentSize: IntSize,
-    offset: IntOffset = IntOffset(0, 0),
-): IntOffset {
+) -> IntOffset = { _, windowSize, popupContentSize ->
     val x: Int = if (this.x + popupContentSize.width + offset.x > windowSize.width) {
         this.x - popupContentSize.width
     } else {
@@ -18,11 +19,11 @@ fun IntOffset.popupPosition(
     } else {
         this.y + offset.y
     }
-    return IntOffset(x, y)
+    IntOffset(x, y)
 }
 
-fun IntOffset.topPosition(
-    popupContentSize: IntSize
-): IntOffset {
-    return IntOffset(this.x, y - popupContentSize.height)
-}
+val IntOffset.topPosition: (anchorBounds: IntRect, windowSize: IntSize, popupContentSize: IntSize) -> IntOffset
+    get() = { _, _, popupContentSize ->
+        IntOffset(this.x, this.y - popupContentSize.height)
+    }
+

@@ -17,14 +17,9 @@ import androidx.compose.runtime.Stable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
 import com.tommy.siliconflow.app.extensions.topPosition
+import com.tommy.siliconflow.app.ui.components.CustomPopup
 import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.ImageCreationEvent
 import org.jetbrains.compose.resources.painterResource
@@ -43,19 +38,9 @@ fun ImageSizePopup(
     doEvent: (ImageCreationEvent) -> Unit,
 ) {
     state.value?.let {
-        Popup(
+        CustomPopup(
             onDismissRequest = { state.value = null },
-            properties = PopupProperties(focusable = true),
-            popupPositionProvider = object : PopupPositionProvider {
-                override fun calculatePosition(
-                    anchorBounds: IntRect,
-                    windowSize: IntSize,
-                    layoutDirection: LayoutDirection,
-                    popupContentSize: IntSize
-                ): IntOffset {
-                    return it.offset.topPosition(popupContentSize)
-                }
-            },
+            calculatePosition = it.offset.topPosition,
         ) {
             Column(
                 modifier = Modifier
