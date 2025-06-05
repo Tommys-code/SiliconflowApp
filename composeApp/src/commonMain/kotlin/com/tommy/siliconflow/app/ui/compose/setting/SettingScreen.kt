@@ -24,6 +24,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.SettingOptions
 import com.tommy.siliconflow.app.data.getThemeTitle
 import com.tommy.siliconflow.app.navigation.AppScreen
+import com.tommy.siliconflow.app.platform.AppInfo
 import com.tommy.siliconflow.app.ui.components.CustomTopBar
 import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.SettingViewModel
@@ -35,6 +36,7 @@ import siliconflowapp.composeapp.generated.resources.ic_arrow_forward
 import siliconflowapp.composeapp.generated.resources.setting
 import siliconflowapp.composeapp.generated.resources.setting_language
 import siliconflowapp.composeapp.generated.resources.setting_theme
+import siliconflowapp.composeapp.generated.resources.version_name
 
 @Composable
 fun SettingScreen(
@@ -48,26 +50,35 @@ fun SettingScreen(
         modifier = Modifier.fillMaxSize(),
         topBar = { CustomTopBar(stringResource(Res.string.setting)) { popBack.invoke() } }
     ) { innerPadding ->
-        Column(
-            modifier =
-                Modifier.padding(top = 16.dp, start = 18.dp, end = 18.dp)
-                    .padding(innerPadding)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(AppTheme.colorScheme.backgroundLeve1),
-        ) {
-            Item(
-                stringResource(Res.string.setting_language),
-                stringResource(settingOptions.language.title),
+        Column(modifier = Modifier.padding(innerPadding).fillMaxSize()) {
+            Column(
+                modifier =
+                    Modifier.padding(top = 16.dp, start = 18.dp, end = 18.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(AppTheme.colorScheme.backgroundLeve1),
             ) {
-                navigate(AppScreen.SettingGraph.LanguageSetting)
+                Item(
+                    stringResource(Res.string.setting_language),
+                    stringResource(settingOptions.language.title),
+                ) {
+                    navigate(AppScreen.SettingGraph.LanguageSetting)
+                }
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
+                Item(
+                    stringResource(Res.string.setting_theme),
+                    stringResource(settingOptions.getThemeTitle()),
+                ) {
+                    navigate(AppScreen.SettingGraph.ThemeSetting)
+                }
             }
-            HorizontalDivider(thickness = 0.5.dp, modifier = Modifier.padding(horizontal = 12.dp))
-            Item(
-                stringResource(Res.string.setting_theme),
-                stringResource(settingOptions.getThemeTitle()),
-            ) {
-                navigate(AppScreen.SettingGraph.ThemeSetting)
-            }
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                stringResource(Res.string.version_name, AppInfo.versionName),
+                modifier = Modifier.align(Alignment.CenterHorizontally).padding(bottom = 24.dp)
+            )
         }
     }
 }

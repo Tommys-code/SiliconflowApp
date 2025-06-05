@@ -49,4 +49,6 @@
     <string name="save_failed">Save failed</string>
     <string name="create_new_image">Generate Image</string>
     <string name="copy_prompt">Copy Prompt</string>
+
+    <string name="version_name">Version %1$s</string>
 </resources>
