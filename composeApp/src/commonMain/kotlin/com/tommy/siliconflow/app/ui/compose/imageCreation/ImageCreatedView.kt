@@ -3,6 +3,7 @@ package com.tommy.siliconflow.app.ui.compose.imageCreation
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -44,6 +45,7 @@ fun ImageCreatedView(
     ratio: String,
     doEvent: (ImageCreationEvent) -> Unit,
     modifier: Modifier = Modifier,
+    longPress: (() -> Unit)? = null,
 ) {
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -57,7 +59,9 @@ fun ImageCreatedView(
                 ImageItem(
                     item,
                     modifier = Modifier
-                        .clickable {
+                        .combinedClickable(
+                            onLongClick = longPress
+                        ) {
                             doEvent(
                                 ImageCreationEvent.Navigate(
                                     AppScreen.ImagePreview(imageData.urls, index)

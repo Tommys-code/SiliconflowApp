@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -53,7 +54,10 @@ import androidx.compose.ui.unit.round
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.Resource
+import com.tommy.siliconflow.app.data.db.ImageCreationHistory
+import com.tommy.siliconflow.app.extensions.onLongPressClearFocus
 import com.tommy.siliconflow.app.ui.components.ThreeDotLoading
+import com.tommy.siliconflow.app.ui.dialog.ImageBottomDialog
 import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopup
 import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopupState
 import com.tommy.siliconflow.app.ui.dialog.ImageSizePopup
@@ -86,6 +90,7 @@ fun ImageGenerationView(
         viewModel.imageCreationData.collectAsStateWithLifecycle(ImageCreationData()).value
 
     val listState = rememberLazyListState()
+    val bottomDialogState = remember { mutableStateOf<ImageCreationHistory?>(null) }
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(Modifier.fillMaxWidth().weight(1f)) {
@@ -96,15 +101,21 @@ fun ImageGenerationView(
             ) {
                 creationLoadingView(createResult)
                 items(history) {
-                    it.image?.let { img ->
-                        ImageCreatedView(
-                            img,
-                            it.ratio,
-                            modifier = Modifier.padding(bottom = 12.dp),
-                            doEvent = { event -> viewModel.doEvent(event) }
-                        )
+                    Column(
+                        modifier = Modifier.fillParentMaxWidth()
+                            .onLongPressClearFocus { bottomDialogState.value = it }
+                    ) {
+                        PromptView(it.prompt)
+                        it.image?.let { img ->
+                            ImageCreatedView(
+                                img,
+                                it.ratio,
+                                modifier = Modifier.padding(bottom = 12.dp),
+                                doEvent = { event -> viewModel.doEvent(event) },
+                                longPress = { bottomDialogState.value = it }
+                            )
+                        }
                     }
-                    PromptView(it.prompt)
                 }
             }
 
@@ -125,6 +136,7 @@ fun ImageGenerationView(
         }
         ImageCreationView(creationData) { viewModel.doEvent(it) }
     }
+    ImageBottomDialog(bottomDialogState) { viewModel.doEvent(it) }
 
     LaunchedEffect(Unit) {
         viewModel.viewEvent.collectLatest {
@@ -150,28 +162,23 @@ private fun LazyListScope.creationLoadingView(result: Resource<Unit>) {
 }
 
 @Composable
-private fun PromptView(prompt: String) {
-    Box(
+private fun ColumnScope.PromptView(prompt: String) {
+    Text(
+        prompt,
         modifier = Modifier
-            .fillMaxWidth(),
-        contentAlignment = Alignment.CenterEnd,
-    ) {
-        Text(
-            prompt,
-            modifier = Modifier
-                .padding(bottom = 10.dp)
-                .clip(
-                    RoundedCornerShape(
-                        topStart = 12.dp,
-                        topEnd = 12.dp,
-                        bottomStart = 12.dp,
-                    )
+            .align(Alignment.End)
+            .padding(bottom = 10.dp, end = 12.dp)
+            .clip(
+                RoundedCornerShape(
+                    topStart = 12.dp,
+                    topEnd = 12.dp,
+                    bottomStart = 12.dp,
                 )
-                .background(AppTheme.colorScheme.container)
-                .padding(horizontal = 20.dp, vertical = 8.dp),
-            style = MaterialTheme.typography.bodyLarge,
-        )
-    }
+            )
+            .background(AppTheme.colorScheme.container)
+            .padding(horizontal = 20.dp, vertical = 8.dp),
+        style = MaterialTheme.typography.bodyLarge,
+    )
 }
 
 @Composable

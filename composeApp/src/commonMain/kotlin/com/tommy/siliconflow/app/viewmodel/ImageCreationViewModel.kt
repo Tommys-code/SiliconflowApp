@@ -20,6 +20,10 @@ import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
+import org.jetbrains.compose.resources.StringResource
+import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.delete_error
+import siliconflowapp.composeapp.generated.resources.delete_success
 
 sealed class ImageCreationEvent {
     data class Navigate(val route: AppScreen) : ImageCreationEvent()
@@ -27,6 +31,8 @@ sealed class ImageCreationEvent {
     data class UpdateRatio(val ratio: ImageRatio) : ImageCreationEvent()
     data class UpdateBatchSize(val size: Int) : ImageCreationEvent()
     data object ScrollTOBottom : ImageCreationEvent()
+    data class ShowToast(val msg: StringResource) : ImageCreationEvent()
+    data class DeleteHistory(val history: ImageCreationHistory) : ImageCreationEvent()
 }
 
 class ImageCreationViewModel(
@@ -62,8 +68,19 @@ class ImageCreationViewModel(
                     is ImageCreationEvent.Creation -> createImage(it.prompt)
                     is ImageCreationEvent.UpdateRatio -> updateRatio(it.ratio)
                     is ImageCreationEvent.UpdateBatchSize -> updateBatchSize(it.size)
-                    ImageCreationEvent.ScrollTOBottom -> {}
-                    is ImageCreationEvent.Navigate -> {}
+                    is ImageCreationEvent.DeleteHistory -> {
+                        val msg = if (repository.deleteHistory(it.history)) {
+                            Res.string.delete_success
+                        } else {
+                            Res.string.delete_error
+                        }
+                        doEvent(ImageCreationEvent.ShowToast(msg))
+                    }
+
+                    ImageCreationEvent.ScrollTOBottom,
+                    is ImageCreationEvent.Navigate,
+                    is ImageCreationEvent.ShowToast -> {
+                    }
                 }
             }
         }

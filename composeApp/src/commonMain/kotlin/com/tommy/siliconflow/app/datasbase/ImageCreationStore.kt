@@ -17,6 +17,8 @@ interface ImageCreationStore {
     suspend fun createSession(userID: String, title: String): Session
     suspend fun insertHistory(sessionID: Long, imageCreationData: ImageCreationData): Long
     suspend fun updateHistory(id: Long, imageData: ImageGenerationsResponse)
+
+    suspend fun deleteChatHistory(history: ImageCreationHistory): Boolean
 }
 
 class ImageCreationStoreImpl(private val appDatabase: AppDatabase) : ImageCreationStore {
@@ -56,5 +58,13 @@ class ImageCreationStoreImpl(private val appDatabase: AppDatabase) : ImageCreati
 
     override suspend fun updateHistory(id: Long, imageData: ImageGenerationsResponse) {
         appDatabase.imageHistoryDao().update(id, imageData.images.map { it.url }, imageData.seed)
+    }
+
+    override suspend fun deleteChatHistory(history: ImageCreationHistory): Boolean {
+        val success = appDatabase.imageHistoryDao().deleteHistory(history) > 0
+        if (appDatabase.imageHistoryDao().checkSessionChatExists(history.sessionId) == 0) {
+            appDatabase.sessionDao().deleteById(history.sessionId)
+        }
+        return success
     }
 }

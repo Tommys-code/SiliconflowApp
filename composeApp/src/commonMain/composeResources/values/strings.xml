@@ -41,10 +41,13 @@
     <string name="light_theme">Light Mode</string>
     <string name="dark_theme">Dark Mode</string>
 
-    <string name="image_creation_title">AI生图</string>
-    <string name="ratio">比例 %1$s</string>
-    <string name="image_creation_hilt">说说你的灵感...</string>
-    <string name="image_creation_size">生成数量 %1$d</string>
-    <string name="save_success">保存成功</string>
-    <string name="save_failed">保存失败</string>
+    <string name="image_creation_title">AI Image Generation</string>
+    <string name="ratio">Ratio %1$s</string>
+    <string name="image_creation_hilt">Share your inspiration...</string>
+    <string name="image_creation_size">Number of images: %1$d</string>
+    <string name="save_success">Saved successfully</string>
+    <string name="save_failed">Save failed</string>
+    <string name="create_new_image">Generate Image</string>
+    <string name="copy_prompt">Copy Prompt</string>
+
 </resources>

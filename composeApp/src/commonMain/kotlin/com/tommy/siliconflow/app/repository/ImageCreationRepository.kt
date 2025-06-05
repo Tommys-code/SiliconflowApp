@@ -1,6 +1,7 @@
 package com.tommy.siliconflow.app.repository
 
 import com.tommy.siliconflow.app.data.ImageCreationData
+import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.data.network.ImageGenerationsRequest
 import com.tommy.siliconflow.app.data.network.ImageGenerationsResponse
@@ -49,5 +50,9 @@ class ImageCreationRepository(
 
     suspend fun saveImageCreationData(data: ImageCreationData) {
         settingDataStore.setImageCreationData(data)
+    }
+
+    suspend fun deleteHistory(history: ImageCreationHistory): Boolean {
+        return imageCreationStore.deleteChatHistory(history)
     }
 }
