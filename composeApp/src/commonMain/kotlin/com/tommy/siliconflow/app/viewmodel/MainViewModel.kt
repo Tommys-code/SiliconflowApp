@@ -7,8 +7,10 @@ import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.MainViewState
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.data.db.SessionType
 import com.tommy.siliconflow.app.datasbase.ModelStore
 import com.tommy.siliconflow.app.extensions.toAnswerMarkdown
+import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.CoroutineScope
@@ -61,6 +63,7 @@ class MainViewModel(
     val sessionList = chatRepository.sessionList
     val currentSession = chatRepository.currentSession
     val chatHistory = chatRepository.chatHistory
+
     @OptIn(ExperimentalCoroutinesApi::class)
     val answer = chatRepository.answer.buffer(0, BufferOverflow.DROP_OLDEST).mapLatest {
         it?.toAnswerMarkdown()
@@ -72,7 +75,8 @@ class MainViewModel(
             viewEvent.collect {
                 when (it) {
                     is MainViewEvent.ToggleDrawer -> mainViewState.toggleDrawer(it.scope)
-                    is MainViewEvent.ChangeSession -> chatRepository.changeSession(it.session)
+                    is MainViewEvent.ChangeSession -> selectSession(it.session)
+
                     is MainViewEvent.ShowPopup -> mainViewState.showPopup(it.session, it.offset)
                     MainViewEvent.DismissPopup -> mainViewState.dismissPopup()
                     is MainViewEvent.ShowOrHideDialog -> mainViewState.showOrHideDialog(it.dialog)
@@ -119,6 +123,14 @@ class MainViewModel(
     fun sendData(data: String) {
         viewModelScope.launch {
             chatRepository.sendData(data.trim())
+        }
+    }
+
+    private fun selectSession(session: Session?) {
+        when (session?.sessionType) {
+            SessionType.CHAT -> chatRepository.changeSession(session)
+            SessionType.IMAGE -> doEvent(MainViewEvent.Navigate(AppScreen.ImageCreation(session.id)))
+            null -> chatRepository.changeSession(session)
         }
     }
 

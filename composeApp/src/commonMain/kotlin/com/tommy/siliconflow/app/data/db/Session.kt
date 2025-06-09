@@ -13,4 +13,11 @@ data class Session(
     val updateTime: Long,
     @ColumnInfo(defaultValue = "")
     val userID: String,
+    @ColumnInfo(defaultValue = "CHAT")
+    val sessionType: SessionType = SessionType.CHAT,
 )
+
+enum class SessionType {
+    CHAT,
+    IMAGE;
+}

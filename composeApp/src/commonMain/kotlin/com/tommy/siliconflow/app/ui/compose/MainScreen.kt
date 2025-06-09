@@ -16,6 +16,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +27,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.model.LocalAIModel
 import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.ui.components.Toast
+import com.tommy.siliconflow.app.ui.dialog.ChooseCreationPopup
 import com.tommy.siliconflow.app.ui.dialog.MainViewDialog
 import com.tommy.siliconflow.app.ui.dialog.SessionPopup
 import com.tommy.siliconflow.app.viewmodel.MainViewEvent
@@ -33,6 +36,7 @@ import org.jetbrains.compose.resources.getString
 import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
 import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.ic_circle_add
 import siliconflowapp.composeapp.generated.resources.ic_dehaze
 import siliconflowapp.composeapp.generated.resources.ic_drop_down
 
@@ -87,18 +91,31 @@ private fun HomeTopAppBar(
     doEvent: (MainViewEvent) -> Unit,
 ) {
     val coroutineScope = rememberCoroutineScope()
-    CenterAlignedTopAppBar(title = {
-        model?.let {
-            TitleView(it.model, doEvent)
+    val expand = remember { mutableStateOf(false) }
+    CenterAlignedTopAppBar(
+        title = {
+            model?.let {
+                TitleView(it.model, doEvent)
+            }
+        },
+        navigationIcon = {
+            IconButton(onClick = { doEvent(MainViewEvent.ToggleDrawer(coroutineScope)) }) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_dehaze),
+                    contentDescription = "drawer",
+                )
+            }
+        },
+        actions = {
+            IconButton(onClick = { expand.value = true }) {
+                Icon(
+                    painter = painterResource(Res.drawable.ic_circle_add),
+                    contentDescription = "add"
+                )
+            }
+            ChooseCreationPopup(expand, doEvent)
         }
-    }, navigationIcon = {
-        IconButton(onClick = { doEvent(MainViewEvent.ToggleDrawer(coroutineScope)) }) {
-            Icon(
-                painter = painterResource(Res.drawable.ic_dehaze),
-                contentDescription = "drawer",
-            )
-        }
-    })
+    )
 }
 
 @Composable

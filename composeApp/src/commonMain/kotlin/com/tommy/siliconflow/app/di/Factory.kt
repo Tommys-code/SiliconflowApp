@@ -12,6 +12,7 @@ internal const val SETTING_STORE_FILE_NAME = "setting.preferences_pb"
 expect class Factory {
     fun createSettingDataStore(): DataStore<Preferences>
     fun createDatabaseBuilder(): RoomDatabase.Builder<AppDatabase>
+    suspend fun saveImage(bytes: ByteArray, fileName: String): Boolean
 }
 
 internal fun createDataStore(

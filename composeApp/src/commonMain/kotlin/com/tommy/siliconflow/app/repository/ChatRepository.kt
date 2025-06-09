@@ -5,6 +5,7 @@ import com.tommy.siliconflow.app.data.MarkdownChatHistory
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.data.db.SessionType
 import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.network.ChoiceDelta
 import com.tommy.siliconflow.app.data.network.Message
@@ -58,7 +59,10 @@ class ChatRepository(
     }
 
     init {
-        scope.launch { _currentSession.value = sessionList.conflate().first().getOrNull(0) }
+        scope.launch {
+            _currentSession.value =
+                sessionList.conflate().first().firstOrNull { it.sessionType == SessionType.CHAT }
+        }
     }
 
     suspend fun sendData(data: String) {

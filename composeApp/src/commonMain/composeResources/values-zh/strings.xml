@@ -40,4 +40,14 @@
     <string name="setting_manual">手动设置</string>
     <string name="light_theme">浅色模式</string>
     <string name="dark_theme">深色模式</string>
+
+    <string name="image_creation_title">AI生图</string>
+    <string name="ratio">比例 %1$s</string>
+    <string name="image_creation_hilt">说说你的灵感...</string>
+    <string name="image_creation_size">生成数量 %1$d</string>
+    <string name="save_success">保存成功</string>
+    <string name="save_failed">保存失败</string>
+    <string name="create_new_image">图像生成</string>
+    <string name="copy_prompt">复制提示词</string>
+    <string name="version_name">版本 %1$s</string>
 </resources>

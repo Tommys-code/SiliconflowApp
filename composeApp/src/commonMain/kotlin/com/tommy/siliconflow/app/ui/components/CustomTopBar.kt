@@ -1,13 +1,16 @@
 package com.tommy.siliconflow.app.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import org.jetbrains.compose.resources.painterResource
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.ic_back
@@ -18,12 +21,20 @@ import kotlin.time.ExperimentalTime
 @Composable
 fun CustomTopBar(
     title: String,
+    containerColor: Color? = null,
+    actions: @Composable RowScope.() -> Unit = {},
     popBack: (() -> Unit)? = null,
 ) {
+    val colors = containerColor?.let {
+        TopAppBarDefaults.centerAlignedTopAppBarColors(containerColor)
+    } ?: TopAppBarDefaults.centerAlignedTopAppBarColors()
+
     CenterAlignedTopAppBar(
         title = {
             Text(title)
-        }, navigationIcon = {
+        },
+        colors = colors,
+        navigationIcon = {
             var lastClickTime = 0L
             popBack?.let {
                 IconButton(onClick = {
@@ -39,7 +50,8 @@ fun CustomTopBar(
                     )
                 }
             }
-        }
+        },
+        actions = actions,
     )
 }
 

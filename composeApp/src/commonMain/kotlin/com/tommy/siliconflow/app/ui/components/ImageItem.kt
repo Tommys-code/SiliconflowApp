@@ -9,12 +9,19 @@ import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalInspectionMode
+import coil3.ImageLoader
+import coil3.PlatformContext
 import coil3.SingletonImageLoader
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePainter
 import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
+import coil3.request.SuccessResult
 import coil3.request.crossfade
+import com.tommy.siliconflow.app.di.KMMInject
+import com.tommy.siliconflow.app.platform.toByteArray
+import kotlin.time.Clock
+import kotlin.time.ExperimentalTime
 
 @Composable
 fun ImageItem(
@@ -47,3 +54,14 @@ fun ImageItem(
     onSuccess = onSuccess,
     onError = onError,
 )
+
+@OptIn(ExperimentalTime::class)
+suspend fun saveImage(context: PlatformContext, url: String): Boolean {
+    val request = ImageRequest.Builder(context).data(url).diskCacheKey(null).build()
+    return (ImageLoader(context).execute(request) as? SuccessResult)?.image?.let {
+        println(it.size)
+        it
+    }?.toByteArray()?.let {
+        KMMInject.factory.saveImage(it, "${Clock.System.now().nanosecondsOfSecond}.jpg")
+    } ?: false
+}

@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.navigation
 
 import kotlinx.serialization.Serializable
 
+@Serializable
 sealed class AppScreen {
 
     @Serializable
@@ -18,6 +19,12 @@ sealed class AppScreen {
 
     @Serializable
     data object ModelList : AppScreen()
+
+    @Serializable
+    data class ImageCreation(val sessionID: Long?) : AppScreen()
+
+    @Serializable
+    data class ImagePreview(val urls: List<String>, val current: Int) : AppScreen()
 
     @Serializable
     data object SettingGraph {

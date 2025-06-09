@@ -19,16 +19,11 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntRect
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
-import androidx.compose.ui.window.PopupProperties
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.extensions.popupPosition
+import com.tommy.siliconflow.app.ui.components.CustomPopup
 import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.MainViewEvent
 import org.jetbrains.compose.resources.DrawableResource
@@ -69,19 +64,9 @@ fun ChatPopup(
     val state = popupState.value
     state?.let {
         val clipboard = LocalClipboardManager.current
-        Popup(
+        CustomPopup(
             onDismissRequest = { popupState.value = null },
-            properties = PopupProperties(focusable = true),
-            popupPositionProvider = object : PopupPositionProvider {
-                override fun calculatePosition(
-                    anchorBounds: IntRect,
-                    windowSize: IntSize,
-                    layoutDirection: LayoutDirection,
-                    popupContentSize: IntSize
-                ): IntOffset {
-                    return it.offset.popupPosition(windowSize, popupContentSize)
-                }
-            }
+            calculatePosition = it.offset.popupPosition(),
         ) {
             Column(
                 modifier = Modifier

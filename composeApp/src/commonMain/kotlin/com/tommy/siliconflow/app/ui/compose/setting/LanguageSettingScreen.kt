@@ -38,7 +38,7 @@ fun LanguageSettingScreen(
     val settingOptions = viewModel.settingOptions.collectAsStateWithLifecycle(null).value
     Scaffold(
         topBar = {
-            CustomTopBar(stringResource(Res.string.setting_language), popBack)
+            CustomTopBar(stringResource(Res.string.setting_language), popBack = popBack)
         }) { innerPadding ->
         Column(
             modifier = Modifier.padding(top = 16.dp, start = 18.dp, end = 18.dp)

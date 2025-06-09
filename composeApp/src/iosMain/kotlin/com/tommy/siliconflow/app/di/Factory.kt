@@ -7,10 +7,18 @@ import androidx.room.RoomDatabase
 import com.tommy.siliconflow.app.datasbase.AppDatabase
 import com.tommy.siliconflow.app.datasbase.DB_FILE_NAME
 import kotlinx.cinterop.ExperimentalForeignApi
+import kotlinx.cinterop.addressOf
+import kotlinx.cinterop.usePinned
+import platform.Foundation.NSData
 import platform.Foundation.NSDocumentDirectory
 import platform.Foundation.NSFileManager
+import platform.Foundation.NSSearchPathForDirectoriesInDomains
 import platform.Foundation.NSURL
 import platform.Foundation.NSUserDomainMask
+import platform.Foundation.dataWithBytes
+import platform.Foundation.writeToFile
+import platform.UIKit.UIImage
+import platform.UIKit.UIImageWriteToSavedPhotosAlbum
 
 actual class Factory {
     @OptIn(ExperimentalForeignApi::class)
@@ -45,4 +53,33 @@ actual class Factory {
         )
         return requireNotNull(documentDirectory).path!!
     }
+
+    @OptIn(ExperimentalForeignApi::class)
+    actual suspend fun saveImage(bytes: ByteArray, fileName: String): Boolean {
+        return try {
+            val documentsDirectory = NSSearchPathForDirectoriesInDomains(
+                NSDocumentDirectory, NSUserDomainMask, true
+            ).first() as String
+            val filePath = "$documentsDirectory/$fileName"
+
+            val data = bytes.usePinned { pinned ->
+                NSData.dataWithBytes(
+                    bytes = pinned.addressOf(0), length = bytes.size.toULong()
+                )
+            }
+            val success = data.writeToFile(filePath, atomically = true)
+            if (success) {
+                UIImage.imageWithData(data)?.saveToPhotosAlbum()
+            }
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+}
+
+@OptIn(ExperimentalForeignApi::class)
+private fun UIImage.saveToPhotosAlbum() {
+    UIImageWriteToSavedPhotosAlbum(this, null,null, null)
 }

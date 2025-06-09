@@ -8,6 +8,7 @@ sealed class Resource<out T>(val result: T?) {
 
     companion object {
         val loading = Loading(true)
+        val init = Loading(false)
     }
 }
 

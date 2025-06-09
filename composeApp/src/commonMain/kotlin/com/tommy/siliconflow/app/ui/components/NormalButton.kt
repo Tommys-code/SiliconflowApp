@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.ui.components
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
@@ -71,4 +72,28 @@ fun NormalButton(
             color = textColor,
         )
     }
+}
+
+@Composable
+fun NormalButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enable: Boolean = true,
+    shape: RoundedCornerShape = RoundedCornerShape(size = 10.dp),
+    color: ButtonColors = ButtonDefaults.buttonColors(
+        containerColor = AppTheme.colorScheme.backgroundLeve1,
+    ),
+    contentPadding: PaddingValues = ButtonDefaults.ContentPadding,
+    border: BorderStroke? = null,
+    content: @Composable RowScope.() -> Unit
+) {
+    Button(
+        modifier = modifier, onClick = onClick,
+        shape = shape,
+        colors = color,
+        enabled = enable,
+        border = border,
+        contentPadding = contentPadding,
+        content = content
+    )
 }
