@@ -56,6 +56,8 @@ import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.extensions.onLongPressClearFocus
+import com.tommy.siliconflow.app.platform.ImageData
+import com.tommy.siliconflow.app.platform.rememberImagerPicker
 import com.tommy.siliconflow.app.ui.components.ThreeDotLoading
 import com.tommy.siliconflow.app.ui.dialog.ImageBottomDialog
 import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopup
@@ -195,6 +197,9 @@ private fun ImageCreationView(
     val focusManager = LocalFocusManager.current
     var position by remember { mutableStateOf(IntOffset.Zero) }
 
+    val imagePickerData = remember { mutableStateOf<ImageData?>(null) }
+    val imagePicker = rememberImagerPicker { imagePickerData.value = it }
+
     Card(
         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
             .onGloballyPositioned { coordinates ->
@@ -220,6 +225,13 @@ private fun ImageCreationView(
                 sizePopupState.value =
                     ImageSizePopupState(offset = IntOffset(it.x, position.y), baseInfo.batchSize)
             }
+            VerticalDivider(
+                thickness = 0.5.dp,
+                modifier = Modifier.padding(horizontal = 12.dp)
+            )
+            Text("111", modifier = Modifier.clickable {
+                imagePicker.launchPicker()
+            })
         }
         HorizontalDivider(thickness = 0.5.dp)
         Row {
