@@ -6,7 +6,7 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import com.tommy.siliconflow.app.data.ImageCreationData
+import com.tommy.siliconflow.app.data.ImageCreationBaseInfo
 import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.Language
 import com.tommy.siliconflow.app.data.SettingOptions
@@ -42,8 +42,8 @@ interface SettingDataStore {
     suspend fun saveLanguage(language: Language)
     suspend fun changeTheme(useSystem: Boolean = true, isDarkMode: Boolean? = null)
 
-    fun getImageCreationData(): Flow<ImageCreationData>
-    suspend fun setImageCreationData(data: ImageCreationData)
+    fun getImageCreationBaseInfo(): Flow<ImageCreationBaseInfo>
+    suspend fun setImageCreationBaseInfo(data: ImageCreationBaseInfo)
 }
 
 class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : SettingDataStore {
@@ -119,17 +119,16 @@ class SettingDataStoreImpl(private val dataStore: DataStore<Preferences>) : Sett
         }
     }
 
-    override fun getImageCreationData(): Flow<ImageCreationData> {
+    override fun getImageCreationBaseInfo(): Flow<ImageCreationBaseInfo> {
         return dataStore.data.map {
-            ImageCreationData(
-                prompt = "",
+            ImageCreationBaseInfo(
                 imageRadio = ImageRatio.fromValue(it[ratioName]),
-                batchSize = it[sizeName] ?: ImageCreationData.DEFAULT_BATCH_SIZE,
+                batchSize = it[sizeName] ?: ImageCreationBaseInfo.DEFAULT_BATCH_SIZE,
             )
         }
     }
 
-    override suspend fun setImageCreationData(data: ImageCreationData) {
+    override suspend fun setImageCreationBaseInfo(data: ImageCreationBaseInfo) {
         dataStore.edit {
             it[ratioName] = data.imageRadio.value
             it[sizeName] = data.batchSize

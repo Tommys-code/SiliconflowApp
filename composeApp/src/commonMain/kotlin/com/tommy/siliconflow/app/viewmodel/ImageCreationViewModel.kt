@@ -2,6 +2,8 @@ package com.tommy.siliconflow.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.tommy.siliconflow.app.data.ImageCreationData
+import com.tommy.siliconflow.app.data.ImageCreationDynamicData
 import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
@@ -15,6 +17,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.first
@@ -44,7 +47,12 @@ class ImageCreationViewModel(
     val viewEvent: SharedFlow<ImageCreationEvent> = _viewEvent
 
     private val currentSession = MutableStateFlow<Session?>(null)
-    val imageCreationData = repository.imageCreationData
+
+    private val _imageCreationDynamicData = MutableStateFlow(ImageCreationDynamicData())
+    val imageCreationData: Flow<ImageCreationData> =
+        repository.imageCreationBaseInfo.combine(_imageCreationDynamicData) { base, dynamic ->
+            ImageCreationData(dynamic, base)
+        }
 
     private val _createResult = MutableStateFlow<Resource<Unit>>(Resource.init)
     val createResult: StateFlow<Resource<Unit>> = _createResult
@@ -88,7 +96,7 @@ class ImageCreationViewModel(
 
     private fun createImage(prompt: String) {
         viewModelScope.launch {
-            val data = imageCreationData.conflate().first().copy(prompt = prompt)
+            val data = _imageCreationDynamicData.value.copy(prompt = prompt)
             val id: Long = currentSession.value?.let {
                 repository.insertHistory(it.id, data)
             } ?: run {
@@ -116,7 +124,7 @@ class ImageCreationViewModel(
     private fun updateRatio(ratio: ImageRatio) {
         viewModelScope.launch {
             repository.saveImageCreationData(
-                imageCreationData.conflate().first().copy(imageRadio = ratio)
+                imageCreationData.conflate().first().baseInfo.copy(imageRadio = ratio)
             )
         }
     }
@@ -124,7 +132,7 @@ class ImageCreationViewModel(
     private fun updateBatchSize(size: Int) {
         viewModelScope.launch {
             repository.saveImageCreationData(
-                imageCreationData.conflate().first().copy(batchSize = size)
+                imageCreationData.conflate().first().baseInfo.copy(batchSize = size)
             )
         }
     }

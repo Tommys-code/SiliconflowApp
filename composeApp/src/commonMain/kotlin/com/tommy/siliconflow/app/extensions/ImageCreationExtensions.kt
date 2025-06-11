@@ -9,7 +9,7 @@ fun ImageCreationData.toImageCreationHistory(
 ) = ImageCreationHistory(
     sessionId = sessionID,
     createTime = time,
-    prompt = prompt,
-    ratio = imageRadio.value,
-    batchSize = batchSize
+    prompt = dynamicData.prompt,
+    ratio = baseInfo.imageRadio.value,
+    batchSize = baseInfo.batchSize
 )

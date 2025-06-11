@@ -87,7 +87,7 @@ fun ImageGenerationView(
     val history = viewModel.history.collectAsStateWithLifecycle(emptyList()).value
     val createResult = viewModel.createResult.collectAsStateWithLifecycle().value
     val creationData =
-        viewModel.imageCreationData.collectAsStateWithLifecycle(ImageCreationData()).value
+        viewModel.imageCreationData.collectAsStateWithLifecycle(null).value
 
     val listState = rememberLazyListState()
     val bottomDialogState = remember { mutableStateOf<ImageCreationHistory?>(null) }
@@ -134,7 +134,7 @@ fun ImageGenerationView(
                 )
             }
         }
-        ImageCreationView(creationData) { viewModel.doEvent(it) }
+        creationData?.let { data -> ImageCreationView(data) { viewModel.doEvent(it) } }
     }
     ImageBottomDialog(bottomDialogState) { viewModel.doEvent(it) }
 
@@ -189,6 +189,8 @@ private fun ImageCreationView(
     val popupState = remember { mutableStateOf<ImageRatioPopupState?>(null) }
     val sizePopupState = remember { mutableStateOf<ImageSizePopupState?>(null) }
 
+    val baseInfo = data.baseInfo
+
     var text by remember { mutableStateOf(TextFieldValue("")) }
     val focusManager = LocalFocusManager.current
     var position by remember { mutableStateOf(IntOffset.Zero) }
@@ -206,17 +208,17 @@ private fun ImageCreationView(
                 .height(IntrinsicSize.Max)
                 .padding(horizontal = 12.dp, vertical = 10.dp)
         ) {
-            ImageConfigItem(stringResource(Res.string.ratio, data.imageRadio.desc)) {
+            ImageConfigItem(stringResource(Res.string.ratio, baseInfo.imageRadio.desc)) {
                 popupState.value =
-                    ImageRatioPopupState(offset = IntOffset(it.x, position.y), data.imageRadio)
+                    ImageRatioPopupState(offset = IntOffset(it.x, position.y), baseInfo.imageRadio)
             }
             VerticalDivider(
                 thickness = 0.5.dp,
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
-            ImageConfigItem(stringResource(Res.string.image_creation_size, data.batchSize)) {
+            ImageConfigItem(stringResource(Res.string.image_creation_size, baseInfo.batchSize)) {
                 sizePopupState.value =
-                    ImageSizePopupState(offset = IntOffset(it.x, position.y), data.batchSize)
+                    ImageSizePopupState(offset = IntOffset(it.x, position.y), baseInfo.batchSize)
             }
         }
         HorizontalDivider(thickness = 0.5.dp)

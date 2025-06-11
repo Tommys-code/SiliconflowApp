@@ -1,6 +1,8 @@
 package com.tommy.siliconflow.app.repository
 
+import com.tommy.siliconflow.app.data.ImageCreationBaseInfo
 import com.tommy.siliconflow.app.data.ImageCreationData
+import com.tommy.siliconflow.app.data.ImageCreationDynamicData
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.data.network.ImageGenerationsRequest
@@ -19,14 +21,19 @@ class ImageCreationRepository(
 ) {
 
     private val useID = settingDataStore.getUserInfo().map { it?.id }
-    val imageCreationData = settingDataStore.getImageCreationData()
+    val imageCreationBaseInfo = settingDataStore.getImageCreationBaseInfo()
 
     suspend fun getSessionById(sessionID: Long) = imageCreationStore.getSession(sessionID)
 
     fun getHistory(sessionID: Long) = imageCreationStore.getHistory(sessionID)
 
-    suspend fun insertHistory(sessionID: Long, data: ImageCreationData): Long {
-        return imageCreationStore.insertHistory(sessionID, data)
+    suspend fun insertHistory(sessionID: Long, data: ImageCreationDynamicData): Long {
+        return imageCreationStore.insertHistory(
+            sessionID, ImageCreationData(
+                dynamicData = data,
+                baseInfo = imageCreationBaseInfo.conflate().first(),
+            )
+        )
     }
 
     suspend fun createSession(prompt: String): Session {
@@ -37,19 +44,21 @@ class ImageCreationRepository(
         imageCreationStore.updateHistory(id, data)
     }
 
-    suspend fun createImage(data: ImageCreationData): ImageGenerationsResponse {
-        return service.imageGenerations(data.createImageGenerationsRequest())
+    suspend fun createImage(data: ImageCreationDynamicData): ImageGenerationsResponse {
+        val baseInfo = imageCreationBaseInfo.conflate().first()
+        return service.imageGenerations(data.createImageGenerationsRequest(baseInfo))
     }
 
-    private fun ImageCreationData.createImageGenerationsRequest() = ImageGenerationsRequest(
-        model = "Kwai-Kolors/Kolors",
-        prompt = prompt,
-        imageSize = imageRadio.value,
-        batchSize = batchSize,
-    )
+    private fun ImageCreationDynamicData.createImageGenerationsRequest(baseInfo: ImageCreationBaseInfo) =
+        ImageGenerationsRequest(
+            model = "Kwai-Kolors/Kolors",
+            prompt = prompt,
+            imageSize = baseInfo.imageRadio.value,
+            batchSize = baseInfo.batchSize,
+        )
 
-    suspend fun saveImageCreationData(data: ImageCreationData) {
-        settingDataStore.setImageCreationData(data)
+    suspend fun saveImageCreationData(data: ImageCreationBaseInfo) {
+        settingDataStore.setImageCreationBaseInfo(data)
     }
 
     suspend fun deleteHistory(history: ImageCreationHistory): Boolean {
