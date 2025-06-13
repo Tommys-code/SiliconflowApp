@@ -30,8 +30,8 @@ actual fun saveToLocal(context: PlatformContext, data: ByteArray, name: String):
     }.getOrNull()
 }
 
-actual fun String.getUri(): String {
-    return this.toUri().toString()
+actual fun PlatformContext.getReferenceImageUri(fileName: String): String {
+    return "$cacheDir/$REFERENCE_IMAGE_DIR/$fileName".toUri().toString()
 }
 
 private fun String.md5(): String {

@@ -50,5 +50,8 @@
     <string name="create_new_image">Generate Image</string>
     <string name="copy_prompt">Copy Prompt</string>
 
+    <string name="reference_image">参考图</string>
+    <string name="choose_reference_image">选择参考图</string>
+
     <string name="version_name">Version %1$s</string>
 </resources>

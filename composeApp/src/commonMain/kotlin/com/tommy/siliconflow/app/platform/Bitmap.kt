@@ -7,4 +7,4 @@ expect fun Image.toByteArray(): ByteArray?
 
 expect fun saveToLocal(context: PlatformContext, data: ByteArray, name: String): String?
 
-expect fun String.getUri(): String
+expect fun PlatformContext.getReferenceImageUri(fileName: String): String

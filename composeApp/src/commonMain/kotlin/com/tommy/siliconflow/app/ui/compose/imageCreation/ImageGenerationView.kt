@@ -6,9 +6,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,19 +46,24 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil3.compose.LocalPlatformContext
 import com.tommy.siliconflow.app.data.ImageCreationData
+import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.extensions.onLongPressClearFocus
 import com.tommy.siliconflow.app.platform.ImageData
+import com.tommy.siliconflow.app.platform.getReferenceImageUri
 import com.tommy.siliconflow.app.platform.rememberImagerPicker
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.ThreeDotLoading
@@ -78,12 +83,14 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.choose_reference_image
 import siliconflowapp.composeapp.generated.resources.ic_arrow_down
 import siliconflowapp.composeapp.generated.resources.ic_arrow_forward
 import siliconflowapp.composeapp.generated.resources.ic_send
 import siliconflowapp.composeapp.generated.resources.image_creation_hilt
 import siliconflowapp.composeapp.generated.resources.image_creation_size
 import siliconflowapp.composeapp.generated.resources.ratio
+import siliconflowapp.composeapp.generated.resources.reference_image
 
 @Composable
 fun ImageGenerationView(
@@ -112,7 +119,7 @@ fun ImageGenerationView(
                         modifier = Modifier.fillParentMaxWidth()
                             .onLongPressClearFocus { bottomDialogState.value = it }
                     ) {
-                        PromptView(it.prompt)
+                        PromptView(it.prompt, it.baseImage, it.ratio)
                         it.image?.let { img ->
                             ImageCreatedView(
                                 img,
@@ -122,6 +129,7 @@ fun ImageGenerationView(
                                 longPress = { bottomDialogState.value = it }
                             )
                         }
+                        Spacer(modifier = Modifier.height(24.dp))
                     }
                 }
             }
@@ -169,23 +177,48 @@ private fun LazyListScope.creationLoadingView(result: Resource<Unit>) {
 }
 
 @Composable
-private fun ColumnScope.PromptView(prompt: String) {
-    Text(
-        prompt,
-        modifier = Modifier
-            .align(Alignment.End)
-            .padding(bottom = 10.dp, end = 12.dp)
-            .clip(
-                RoundedCornerShape(
-                    topStart = 12.dp,
-                    topEnd = 12.dp,
-                    bottomStart = 12.dp,
+private fun PromptView(prompt: String, fileName: String?, ratio: String) {
+    val context = LocalPlatformContext.current
+    val referenceImagePreview = remember { mutableStateOf<String?>(null) }
+    Column(
+        modifier = Modifier.padding(bottom = 10.dp)
+    ) {
+        Text(
+            buildAnnotatedString {
+                append(prompt)
+                withStyle(SpanStyle(fontSize = MaterialTheme.typography.labelSmall.fontSize)) {
+                    append(" - ")
+                    append(ImageRatio.fromValue(ratio).desc)
+                }
+            },
+            modifier = Modifier
+                .padding(start = 12.dp, end = 12.dp)
+                .clip(
+                    RoundedCornerShape(
+                        topStart = 12.dp,
+                        topEnd = 12.dp,
+                        bottomEnd = 12.dp,
+                    )
                 )
-            )
-            .background(AppTheme.colorScheme.container)
-            .padding(horizontal = 20.dp, vertical = 8.dp),
-        style = MaterialTheme.typography.bodyLarge,
-    )
+                .background(AppTheme.colorScheme.container)
+                .padding(horizontal = 20.dp, vertical = 8.dp),
+            style = MaterialTheme.typography.bodyLarge,
+        )
+        fileName?.let { context.getReferenceImageUri(it) }?.takeIf { it.isNotBlank() }?.let {
+            Row(
+                modifier = Modifier.padding(horizontal = 12.dp)
+                    .clickable { referenceImagePreview.value = it },
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Text(
+                    stringResource(Res.string.reference_image),
+                    style = MaterialTheme.typography.labelSmall
+                )
+                ImageItem(it, modifier = Modifier.size(16.dp))
+            }
+        }
+    }
+    ReferenceImageDialog(referenceImagePreview)
 }
 
 @Composable
@@ -303,7 +336,8 @@ private fun ReferenceImageItem(
     imageData: ImageData?,
     onClick: () -> Unit,
 ) {
-    val text = imageData?.let { "参考图" } ?: "选择参考图"
+    val text = imageData?.let { stringResource(Res.string.reference_image) }
+        ?: stringResource(Res.string.choose_reference_image)
     Row(
         modifier = Modifier
             .border(

@@ -31,7 +31,6 @@ actual fun saveToLocal(context: PlatformContext, data: ByteArray, name: String):
 
     val fileName = sha256(name)
     val filePath = "$cacheFolder/${fileName}"
-    val fileUrl = NSURL.fileURLWithPath(filePath)
     if (fileManager.fileExistsAtPath(filePath)) {
         return fileName
     }
@@ -42,8 +41,10 @@ actual fun saveToLocal(context: PlatformContext, data: ByteArray, name: String):
     }
 }
 
-actual fun String.getUri(): String {
-    return ""
+actual fun PlatformContext.getReferenceImageUri(fileName: String): String {
+    val cachesDir = getCachesDirectory()
+    val filePath = "${cachesDir}/$REFERENCE_IMAGE_DIR/$fileName"
+    return NSURL.fileURLWithPath(filePath).absoluteString.orEmpty()
 }
 
 private fun getCachesDirectory(): String {
