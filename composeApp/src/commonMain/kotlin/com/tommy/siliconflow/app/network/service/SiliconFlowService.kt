@@ -12,7 +12,6 @@ import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 
-private const val IMAGE_GENERATION_TIMEOUT = 30000L
 private const val IMAGE_GENERATION_RETRY = 5
 
 private const val USER_INFO_URL = "user/info"
@@ -29,7 +28,7 @@ class SiliconFlowService(private val unAuthClient: HttpClient, private val authC
         return authClient.post(IMAGE_GENERATIONS_URL) {
             setBody(request)
             timeout {
-                socketTimeoutMillis = IMAGE_GENERATION_TIMEOUT
+                socketTimeoutMillis = Long.MAX_VALUE
             }
             retry { this.maxRetries = IMAGE_GENERATION_RETRY }
         }.body<ImageGenerationsResponse>()

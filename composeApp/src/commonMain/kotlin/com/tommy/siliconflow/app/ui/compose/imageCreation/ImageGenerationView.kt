@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.ui.compose.imageCreation
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -52,18 +53,21 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import coil3.compose.LocalPlatformContext
 import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.extensions.onLongPressClearFocus
 import com.tommy.siliconflow.app.platform.ImageData
 import com.tommy.siliconflow.app.platform.rememberImagerPicker
+import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.ThreeDotLoading
 import com.tommy.siliconflow.app.ui.dialog.ImageBottomDialog
 import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopup
 import com.tommy.siliconflow.app.ui.dialog.ImageRatioPopupState
 import com.tommy.siliconflow.app.ui.dialog.ImageSizePopup
 import com.tommy.siliconflow.app.ui.dialog.ImageSizePopupState
+import com.tommy.siliconflow.app.ui.dialog.ReferenceImageDialog
 import com.tommy.siliconflow.app.ui.theme.AppColor
 import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.ImageCreationEvent
@@ -75,6 +79,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.ic_arrow_down
+import siliconflowapp.composeapp.generated.resources.ic_arrow_forward
 import siliconflowapp.composeapp.generated.resources.ic_send
 import siliconflowapp.composeapp.generated.resources.image_creation_hilt
 import siliconflowapp.composeapp.generated.resources.image_creation_size
@@ -188,17 +193,19 @@ private fun ImageCreationView(
     data: ImageCreationData,
     doEvent: (ImageCreationEvent) -> Unit
 ) {
+    val context = LocalPlatformContext.current
     val popupState = remember { mutableStateOf<ImageRatioPopupState?>(null) }
     val sizePopupState = remember { mutableStateOf<ImageSizePopupState?>(null) }
 
     val baseInfo = data.baseInfo
+    val dynamicData = data.dynamicData
 
     var text by remember { mutableStateOf(TextFieldValue("")) }
     val focusManager = LocalFocusManager.current
     var position by remember { mutableStateOf(IntOffset.Zero) }
 
-    val imagePickerData = remember { mutableStateOf<ImageData?>(null) }
-    val imagePicker = rememberImagerPicker { imagePickerData.value = it }
+    val showReferenceImagePreview = remember { mutableStateOf(false) }
+    val imagePicker = rememberImagerPicker { doEvent(ImageCreationEvent.UpdateReferenceImage(it)) }
 
     Card(
         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
@@ -229,9 +236,13 @@ private fun ImageCreationView(
                 thickness = 0.5.dp,
                 modifier = Modifier.padding(horizontal = 12.dp)
             )
-            Text("111", modifier = Modifier.clickable {
-                imagePicker.launchPicker()
-            })
+            ReferenceImageItem(dynamicData.referenceImage) {
+                if (dynamicData.referenceImage != null) {
+                    showReferenceImagePreview.value = true
+                } else {
+                    imagePicker.launchPicker()
+                }
+            }
         }
         HorizontalDivider(thickness = 0.5.dp)
         Row {
@@ -269,7 +280,7 @@ private fun ImageCreationView(
                     if (text.text.isNotBlank()) {
                         doEvent.invoke(ImageCreationEvent.ScrollTOBottom)
                         focusManager.clearFocus()
-                        doEvent.invoke(ImageCreationEvent.Creation(text.text))
+                        doEvent.invoke(ImageCreationEvent.Creation(text.text, context))
                         text = TextFieldValue("")
                     }
                 },
@@ -284,4 +295,41 @@ private fun ImageCreationView(
     }
     ImageRatioPopup(popupState, doEvent)
     ImageSizePopup(sizePopupState, doEvent)
+    ReferenceImageDialog(dynamicData.referenceImage, showReferenceImagePreview, doEvent)
+}
+
+@Composable
+private fun ReferenceImageItem(
+    imageData: ImageData?,
+    onClick: () -> Unit,
+) {
+    val text = imageData?.let { "参考图" } ?: "选择参考图"
+    Row(
+        modifier = Modifier
+            .border(
+                BorderStroke(0.5.dp, MaterialTheme.colorScheme.outlineVariant),
+                RoundedCornerShape(10.dp)
+            )
+            .clickable { onClick() }
+            .padding(horizontal = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+    ) {
+        Text(
+            text,
+            modifier = Modifier
+                .padding(vertical = 8.dp),
+            color = AppTheme.colorScheme.primaryText,
+            style = MaterialTheme.typography.bodyMedium,
+        )
+        imageData?.let {
+            ImageItem(it.uri, modifier = Modifier.size(24.dp))
+        } ?: run {
+            Icon(
+                modifier = Modifier.size(12.dp).padding(start = 2.dp),
+                painter = painterResource(Res.drawable.ic_arrow_forward),
+                contentDescription = "choose",
+                tint = AppTheme.colorScheme.primaryText,
+            )
+        }
+    }
 }

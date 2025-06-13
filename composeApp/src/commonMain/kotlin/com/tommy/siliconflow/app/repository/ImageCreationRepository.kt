@@ -55,6 +55,7 @@ class ImageCreationRepository(
             prompt = prompt,
             imageSize = baseInfo.imageRadio.value,
             batchSize = baseInfo.batchSize,
+            image = referenceImageInfo?.base64Data,
         )
 
     suspend fun saveImageCreationData(data: ImageCreationBaseInfo) {

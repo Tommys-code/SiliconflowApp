@@ -2,13 +2,16 @@ package com.tommy.siliconflow.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import coil3.PlatformContext
 import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.ImageCreationDynamicData
 import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.data.db.Session
+import com.tommy.siliconflow.app.extensions.generate
 import com.tommy.siliconflow.app.navigation.AppScreen
+import com.tommy.siliconflow.app.platform.ImageData
 import com.tommy.siliconflow.app.repository.ImageCreationRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -30,12 +33,13 @@ import siliconflowapp.composeapp.generated.resources.delete_success
 
 sealed class ImageCreationEvent {
     data class Navigate(val route: AppScreen) : ImageCreationEvent()
-    data class Creation(val prompt: String) : ImageCreationEvent()
+    data class Creation(val prompt: String, val context: PlatformContext) : ImageCreationEvent()
     data class UpdateRatio(val ratio: ImageRatio) : ImageCreationEvent()
     data class UpdateBatchSize(val size: Int) : ImageCreationEvent()
     data object ScrollTOBottom : ImageCreationEvent()
     data class ShowToast(val msg: StringResource) : ImageCreationEvent()
     data class DeleteHistory(val history: ImageCreationHistory) : ImageCreationEvent()
+    data class UpdateReferenceImage(val imageData: ImageData?) : ImageCreationEvent()
 }
 
 class ImageCreationViewModel(
@@ -73,7 +77,7 @@ class ImageCreationViewModel(
         viewModelScope.launch {
             viewEvent.collectLatest {
                 when (it) {
-                    is ImageCreationEvent.Creation -> createImage(it.prompt)
+                    is ImageCreationEvent.Creation -> createImage(it.prompt, it.context)
                     is ImageCreationEvent.UpdateRatio -> updateRatio(it.ratio)
                     is ImageCreationEvent.UpdateBatchSize -> updateBatchSize(it.size)
                     is ImageCreationEvent.DeleteHistory -> {
@@ -85,6 +89,7 @@ class ImageCreationViewModel(
                         doEvent(ImageCreationEvent.ShowToast(msg))
                     }
 
+                    is ImageCreationEvent.UpdateReferenceImage -> updateReferenceImage(it.imageData)
                     ImageCreationEvent.ScrollTOBottom,
                     is ImageCreationEvent.Navigate,
                     is ImageCreationEvent.ShowToast -> {
@@ -94,9 +99,9 @@ class ImageCreationViewModel(
         }
     }
 
-    private fun createImage(prompt: String) {
+    private fun createImage(prompt: String, context: PlatformContext) {
         viewModelScope.launch {
-            val data = _imageCreationDynamicData.value.copy(prompt = prompt)
+            val data = _imageCreationDynamicData.value.copy(prompt = prompt).generate(context)
             val id: Long = currentSession.value?.let {
                 repository.insertHistory(it.id, data)
             } ?: run {
@@ -114,6 +119,7 @@ class ImageCreationViewModel(
             }.onFailure {
                 _createResult.value = Resource.Error(it)
             }
+            clearDynamicData()
         }
     }
 
@@ -135,6 +141,15 @@ class ImageCreationViewModel(
                 imageCreationData.conflate().first().baseInfo.copy(batchSize = size)
             )
         }
+    }
+
+    private fun updateReferenceImage(imageData: ImageData?) {
+        _imageCreationDynamicData.value =
+            _imageCreationDynamicData.value.copy(referenceImage = imageData)
+    }
+
+    private fun clearDynamicData() {
+        _imageCreationDynamicData.value = ImageCreationDynamicData()
     }
 
 }

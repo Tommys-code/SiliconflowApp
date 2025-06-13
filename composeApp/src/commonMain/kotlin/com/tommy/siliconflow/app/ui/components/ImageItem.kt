@@ -18,10 +18,18 @@ import coil3.compose.LocalPlatformContext
 import coil3.request.ImageRequest
 import coil3.request.SuccessResult
 import coil3.request.crossfade
+import coil3.request.maxBitmapSize
+import coil3.size.Size
+import com.tommy.siliconflow.app.data.ReferenceImageInfo
 import com.tommy.siliconflow.app.di.KMMInject
+import com.tommy.siliconflow.app.platform.saveToLocal
 import com.tommy.siliconflow.app.platform.toByteArray
+import kotlin.io.encoding.Base64
+import kotlin.io.encoding.ExperimentalEncodingApi
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
+
+const val REFERENCE_IMAGE_DIR = "reference_image_cache"
 
 @Composable
 fun ImageItem(
@@ -58,10 +66,23 @@ fun ImageItem(
 @OptIn(ExperimentalTime::class)
 suspend fun saveImage(context: PlatformContext, url: String): Boolean {
     val request = ImageRequest.Builder(context).data(url).diskCacheKey(null).build()
-    return (ImageLoader(context).execute(request) as? SuccessResult)?.image?.let {
-        println(it.size)
-        it
-    }?.toByteArray()?.let {
+    return (ImageLoader(context).execute(request) as? SuccessResult)?.image?.toByteArray()?.let {
         KMMInject.factory.saveImage(it, "${Clock.System.now().nanosecondsOfSecond}.jpg")
     } ?: false
+}
+
+@OptIn(ExperimentalEncodingApi::class)
+suspend fun getReferenceImageInfoFromUri(
+    context: PlatformContext,
+    uri: String
+): ReferenceImageInfo? {
+    val request = ImageRequest.Builder(context).data(uri)
+        .maxBitmapSize(Size(2048, 2048)).build()
+    val imageLoader = ImageLoader.Builder(context).build()
+    return (imageLoader.execute(request) as? SuccessResult)?.image?.toByteArray()?.let {
+        ReferenceImageInfo(
+            base64Data = "data:image/jpeg;base64, ${Base64.encode(it)}",
+            fileName = saveToLocal(context, it, uri),
+        )
+    }
 }
