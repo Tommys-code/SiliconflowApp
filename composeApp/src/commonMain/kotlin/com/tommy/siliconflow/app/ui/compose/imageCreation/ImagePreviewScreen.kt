@@ -15,13 +15,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import coil3.compose.LocalPlatformContext
 import com.tommy.siliconflow.app.ui.components.CustomTopBar
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.PagerIndicator
 import com.tommy.siliconflow.app.ui.components.Toast
-import com.tommy.siliconflow.app.ui.components.saveImage
 import com.tommy.siliconflow.app.ui.theme.AppColor
+import com.tommy.siliconflow.app.utils.rememberImageProcessing
 import kotlinx.coroutines.launch
 import net.engawapg.lib.zoomable.rememberZoomState
 import net.engawapg.lib.zoomable.zoomable
@@ -39,13 +38,15 @@ fun ImagePreviewScreen(
     popBack: () -> Unit,
 ) {
     val pagerState = rememberPagerState(pageCount = { urls.size })
+
+    val imageProcessing = rememberImageProcessing()
+
     val scope = rememberCoroutineScope()
-    val context = LocalPlatformContext.current
     val hostState = SnackbarHostState()
 
     fun saveToLocal() {
         scope.launch {
-            val result = saveImage(context, urls[pagerState.currentPage])
+            val result = imageProcessing.saveImage(urls[pagerState.currentPage])
             val res = if (result) {
                 Res.string.save_success
             } else {

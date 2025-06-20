@@ -37,6 +37,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -56,14 +57,12 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil3.compose.LocalPlatformContext
 import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.ImageRatio
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.extensions.onLongPressClearFocus
 import com.tommy.siliconflow.app.platform.ImageData
-import com.tommy.siliconflow.app.platform.getReferenceImageUri
 import com.tommy.siliconflow.app.platform.rememberImagerPicker
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.ThreeDotLoading
@@ -75,9 +74,11 @@ import com.tommy.siliconflow.app.ui.dialog.ImageSizePopupState
 import com.tommy.siliconflow.app.ui.dialog.ReferenceImageDialog
 import com.tommy.siliconflow.app.ui.theme.AppColor
 import com.tommy.siliconflow.app.ui.theme.AppTheme
+import com.tommy.siliconflow.app.utils.rememberImageProcessing
 import com.tommy.siliconflow.app.viewmodel.ImageCreationEvent
 import com.tommy.siliconflow.app.viewmodel.ImageCreationViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.viewmodel.koinViewModel
@@ -178,8 +179,8 @@ private fun LazyListScope.creationLoadingView(result: Resource<Unit>) {
 
 @Composable
 private fun PromptView(prompt: String, fileName: String?, ratio: String) {
-    val context = LocalPlatformContext.current
     val referenceImagePreview = remember { mutableStateOf<String?>(null) }
+    val imageProcessing = rememberImageProcessing()
     Column(
         modifier = Modifier.padding(bottom = 10.dp)
     ) {
@@ -204,19 +205,20 @@ private fun PromptView(prompt: String, fileName: String?, ratio: String) {
                 .padding(horizontal = 20.dp, vertical = 8.dp),
             style = MaterialTheme.typography.bodyLarge,
         )
-        fileName?.let { context.getReferenceImageUri(it) }?.takeIf { it.isNotBlank() }?.let {
-            Row(
-                modifier = Modifier.padding(horizontal = 12.dp)
-                    .clickable { referenceImagePreview.value = it },
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Text(
-                    stringResource(Res.string.reference_image),
-                    style = MaterialTheme.typography.labelSmall
-                )
-                ImageItem(it, modifier = Modifier.size(16.dp))
+        fileName?.let { imageProcessing.getReferenceImageUri(it) }?.takeIf { it.isNotBlank() }
+            ?.let {
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                        .clickable { referenceImagePreview.value = it },
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Text(
+                        stringResource(Res.string.reference_image),
+                        style = MaterialTheme.typography.labelSmall
+                    )
+                    ImageItem(it, modifier = Modifier.size(16.dp))
+                }
             }
-        }
     }
     ReferenceImageDialog(referenceImagePreview)
 }
@@ -226,7 +228,6 @@ private fun ImageCreationView(
     data: ImageCreationData,
     doEvent: (ImageCreationEvent) -> Unit
 ) {
-    val context = LocalPlatformContext.current
     val popupState = remember { mutableStateOf<ImageRatioPopupState?>(null) }
     val sizePopupState = remember { mutableStateOf<ImageSizePopupState?>(null) }
 
@@ -239,6 +240,8 @@ private fun ImageCreationView(
 
     val showReferenceImagePreview = remember { mutableStateOf(false) }
     val imagePicker = rememberImagerPicker { doEvent(ImageCreationEvent.UpdateReferenceImage(it)) }
+    val imageProcessing = rememberImageProcessing()
+    val scope = rememberCoroutineScope()
 
     Card(
         modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp)
@@ -311,10 +314,17 @@ private fun ImageCreationView(
                 enabled = text.text.isNotBlank(),
                 onClick = {
                     if (text.text.isNotBlank()) {
-                        doEvent.invoke(ImageCreationEvent.ScrollTOBottom)
-                        focusManager.clearFocus()
-                        doEvent.invoke(ImageCreationEvent.Creation(text.text, context))
-                        text = TextFieldValue("")
+                        scope.launch {
+                            doEvent.invoke(ImageCreationEvent.ScrollTOBottom)
+                            focusManager.clearFocus()
+                            val referenceImageInfo = data.dynamicData.referenceImage?.uri?.let {
+                                imageProcessing.getReferenceImageInfoFromUri(it)
+                            }
+                            doEvent.invoke(
+                                ImageCreationEvent.Creation(text.text, referenceImageInfo)
+                            )
+                            text = TextFieldValue("")
+                        }
                     }
                 },
             ) {

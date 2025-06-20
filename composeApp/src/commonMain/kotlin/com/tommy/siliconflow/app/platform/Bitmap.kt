@@ -1,10 +1,15 @@
 package com.tommy.siliconflow.app.platform
 
+import androidx.compose.runtime.Composable
 import coil3.Image
-import coil3.PlatformContext
 
 expect fun Image.toByteArray(): ByteArray?
 
-expect fun saveToLocal(context: PlatformContext, data: ByteArray, name: String): String?
+expect class LocalImageProcessing {
+    fun imageToByteArray(image: Image): ByteArray?
+    suspend fun saveToLocal(data: ByteArray, name: String): String?
+    fun getReferenceImageUri(fileName: String): String
+}
 
-expect fun PlatformContext.getReferenceImageUri(fileName: String): String
+@Composable
+expect fun rememberLocalImageProcessing(): LocalImageProcessing

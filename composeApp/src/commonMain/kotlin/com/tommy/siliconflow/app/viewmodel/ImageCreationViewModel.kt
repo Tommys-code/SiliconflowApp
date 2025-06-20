@@ -2,14 +2,13 @@ package com.tommy.siliconflow.app.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil3.PlatformContext
 import com.tommy.siliconflow.app.data.ImageCreationData
 import com.tommy.siliconflow.app.data.ImageCreationDynamicData
 import com.tommy.siliconflow.app.data.ImageRatio
+import com.tommy.siliconflow.app.data.ReferenceImageInfo
 import com.tommy.siliconflow.app.data.Resource
 import com.tommy.siliconflow.app.data.db.ImageCreationHistory
 import com.tommy.siliconflow.app.data.db.Session
-import com.tommy.siliconflow.app.extensions.generate
 import com.tommy.siliconflow.app.navigation.AppScreen
 import com.tommy.siliconflow.app.platform.ImageData
 import com.tommy.siliconflow.app.repository.ImageCreationRepository
@@ -33,7 +32,9 @@ import siliconflowapp.composeapp.generated.resources.delete_success
 
 sealed class ImageCreationEvent {
     data class Navigate(val route: AppScreen) : ImageCreationEvent()
-    data class Creation(val prompt: String, val context: PlatformContext) : ImageCreationEvent()
+    data class Creation(val prompt: String, val referenceImage: ReferenceImageInfo?) :
+        ImageCreationEvent()
+
     data class UpdateRatio(val ratio: ImageRatio) : ImageCreationEvent()
     data class UpdateBatchSize(val size: Int) : ImageCreationEvent()
     data object ScrollTOBottom : ImageCreationEvent()
@@ -77,7 +78,7 @@ class ImageCreationViewModel(
         viewModelScope.launch {
             viewEvent.collectLatest {
                 when (it) {
-                    is ImageCreationEvent.Creation -> createImage(it.prompt, it.context)
+                    is ImageCreationEvent.Creation -> createImage(it.prompt, it.referenceImage)
                     is ImageCreationEvent.UpdateRatio -> updateRatio(it.ratio)
                     is ImageCreationEvent.UpdateBatchSize -> updateBatchSize(it.size)
                     is ImageCreationEvent.DeleteHistory -> {
@@ -99,9 +100,12 @@ class ImageCreationViewModel(
         }
     }
 
-    private fun createImage(prompt: String, context: PlatformContext) {
+    private fun createImage(prompt: String, referenceImage: ReferenceImageInfo?) {
         viewModelScope.launch {
-            val data = _imageCreationDynamicData.value.copy(prompt = prompt).generate(context)
+            val data = _imageCreationDynamicData.value.copy(
+                prompt = prompt,
+                referenceImageInfo = referenceImage
+            )
             val id: Long = currentSession.value?.let {
                 repository.insertHistory(it.id, data)
             } ?: run {
