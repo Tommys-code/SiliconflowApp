@@ -69,7 +69,7 @@ fun ThreeDotLoading(
                 animation = keyframes {
                     durationMillis = dotCount * delayPerDot * 2
                     0.2f at 0
-                    1f at delayPerDot with LinearEasing
+                    1f at delayPerDot using LinearEasing
                     0.2f at delayPerDot * 2
                 },
                 initialStartOffset = StartOffset(index * delayPerDot)

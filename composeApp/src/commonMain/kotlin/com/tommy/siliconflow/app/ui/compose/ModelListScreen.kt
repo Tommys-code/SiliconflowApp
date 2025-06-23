@@ -2,12 +2,15 @@ package com.tommy.siliconflow.app.ui.compose
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -18,7 +21,10 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.tommy.siliconflow.app.ui.components.CustomTopBar
 import com.tommy.siliconflow.app.ui.theme.AppTheme
 import com.tommy.siliconflow.app.viewmodel.ModelListViewModel
+import org.jetbrains.compose.resources.painterResource
 import org.koin.compose.viewmodel.koinViewModel
+import siliconflowapp.composeapp.generated.resources.Res
+import siliconflowapp.composeapp.generated.resources.ic_check
 
 @Composable
 internal fun ModelListScreen(
@@ -38,8 +44,7 @@ internal fun ModelListScreen(
             val currentModel = viewModel.currentModel.collectAsStateWithLifecycle(null).value
             LazyColumn(modifier = Modifier.fillMaxSize().padding(innerPadding)) {
                 items(it) { model ->
-                    Text(
-                        model.model,
+                    Row(
                         modifier = Modifier
                             .clickable {
                                 viewModel.changeModel(model)
@@ -50,8 +55,19 @@ internal fun ModelListScreen(
                                 else Color.Transparent
                             )
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 20.dp)
-                    )
+                            .padding(horizontal = 24.dp, vertical = 20.dp)) {
+                        Text(
+                            model.model,
+                            modifier = Modifier.weight(1f)
+                        )
+                        if (model == currentModel) {
+                            Icon(
+                                painter = painterResource(Res.drawable.ic_check),
+                                modifier = Modifier.size(24.dp),
+                                contentDescription = "",
+                            )
+                        }
+                    }
                     HorizontalDivider(
                         thickness = 0.5.dp,
                         modifier = Modifier.padding(horizontal = 12.dp)

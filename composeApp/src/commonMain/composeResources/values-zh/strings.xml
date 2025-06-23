@@ -49,5 +49,9 @@
     <string name="save_failed">保存失败</string>
     <string name="create_new_image">图像生成</string>
     <string name="copy_prompt">复制提示词</string>
+
+    <string name="reference_image">参考图</string>
+    <string name="choose_reference_image">选择参考图</string>
+
     <string name="version_name">版本 %1$s</string>
 </resources>
