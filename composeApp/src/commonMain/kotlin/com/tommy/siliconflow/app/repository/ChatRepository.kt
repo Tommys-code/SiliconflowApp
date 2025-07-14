@@ -2,6 +2,7 @@ package com.tommy.siliconflow.app.repository
 
 import com.tommy.siliconflow.app.data.ChatResult
 import com.tommy.siliconflow.app.data.MarkdownChatHistory
+import com.tommy.siliconflow.app.data.VLMImageData
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
@@ -16,6 +17,7 @@ import com.tommy.siliconflow.app.extensions.toChatContent
 import com.tommy.siliconflow.app.extensions.toChatContentResult
 import com.tommy.siliconflow.app.extensions.toMarkdownChatHistory
 import com.tommy.siliconflow.app.network.service.SSEService
+import com.tommy.siliconflow.app.platform.ImageData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -65,24 +67,27 @@ class ChatRepository(
         }
     }
 
-    suspend fun sendData(data: String) {
+    suspend fun sendData(data: String, imageData: List<VLMImageData>? = null) {
         val chatID: Long = currentSession.value?.let {
-            chatHistoryStore.insertSendHistory(it.id, data)
+            chatHistoryStore.insertSendHistory(it.id, data, imageData)
         } ?: run {
-            chatHistoryStore.createSession(useID.conflate().first().orEmpty(), data).let {
-                _currentSession.value = it.first
-                it.second
-            }
+            chatHistoryStore.createSession(useID.conflate().first().orEmpty(), data, imageData)
+                .let {
+                    _currentSession.value = it.first
+                    it.second
+                }
         }
         _answer.emit(ChatResult.Start)
-        chatCompletions(data, chatID)
+        chatCompletions(data, chatID, imageData)
     }
 
-    private suspend fun chatCompletions(data: String, chatID: Long) {
+    private suspend fun chatCompletions(
+        data: String,
+        chatID: Long,
+        imageData: List<VLMImageData>? = null,
+    ) {
         runCatching {
-            sseService.chat(
-                listOf(Message(Role.USER.value, data))
-            ).collect {
+            sseService.chat(data, imageData).collect {
                 updateAnswer(it, chatID)
             }
         }.onFailure {

@@ -54,4 +54,8 @@
     <string name="choose_reference_image">Reference image</string>
 
     <string name="version_name">Version %1$s</string>
+
+    <string name="upload_image_title">上传图片文件</string>
+    <string name="upload_image">上传图片</string>
+    <string name="input_image_url">输入图片的 URL</string>
 </resources>

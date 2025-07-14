@@ -34,6 +34,7 @@ data class ChatHistory(
 data class ChatContent(
     val content: String,
     val role: Role,
+    val image: List<String>? = null,
 )
 
 enum class Role(val value: String) {

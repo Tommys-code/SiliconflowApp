@@ -12,3 +12,7 @@ fun formatPriceSimple(amount: Double): String {
         "¥ $amount"
     }
 }
+
+fun String.isValidUrl(): Boolean {
+    return this.startsWith("http://") || this.startsWith("https://")
+}

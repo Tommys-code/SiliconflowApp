@@ -5,20 +5,25 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.MainViewState
+import com.tommy.siliconflow.app.data.VLMImageData
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.data.db.SessionType
 import com.tommy.siliconflow.app.datasbase.ModelStore
 import com.tommy.siliconflow.app.extensions.toAnswerMarkdown
 import com.tommy.siliconflow.app.navigation.AppScreen
+import com.tommy.siliconflow.app.platform.ImageData
 import com.tommy.siliconflow.app.repository.ChatRepository
 import com.tommy.siliconflow.app.repository.SiliconFlowRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.buffer
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
@@ -45,6 +50,8 @@ sealed class MainViewEvent {
     data class SessionCheck(val session: Session) : MainViewEvent()
     data object CheckAll : MainViewEvent()
     data class DeleteChatHistory(val history: ChatHistory) : MainViewEvent()
+    data class AddImageData(val imageData: VLMImageData) : MainViewEvent()
+    data class RemoveImageData(val imageData: VLMImageData) : MainViewEvent()
 }
 
 class MainViewModel(
@@ -110,19 +117,23 @@ class MainViewModel(
                         doEvent(MainViewEvent.ShowToast(msgRes = res))
                     }
 
+                    is MainViewEvent.AddImageData -> mainViewState.addImageData(it.imageData)
+                    is MainViewEvent.RemoveImageData -> mainViewState.removeImageData(it.imageData)
                     else -> {}
                 }
             }
         }
+        viewModelScope.launch { currentModel.collectLatest { mainViewState.clearImageData() } }
     }
 
     fun doEvent(event: MainViewEvent) {
         viewModelScope.launch { _viewEvent.emit(event) }
     }
 
-    fun sendData(data: String) {
+    fun sendData(data: String, imageData: List<VLMImageData>? = null) {
         viewModelScope.launch {
-            chatRepository.sendData(data.trim())
+            mainViewState.clearImageData()
+            chatRepository.sendData(data.trim(), imageData)
         }
     }
 

@@ -27,6 +27,7 @@ import siliconflowapp.composeapp.generated.resources.language_default
 import siliconflowapp.composeapp.generated.resources.light_theme
 import siliconflowapp.composeapp.generated.resources.setting_language
 import siliconflowapp.composeapp.generated.resources.setting_manual
+import siliconflowapp.composeapp.generated.resources.setting_theme
 import siliconflowapp.composeapp.generated.resources.theme_default_tips
 
 @Composable
@@ -37,7 +38,7 @@ fun ThemeScreen(
     val settingOptions = viewModel.settingOptions.collectAsStateWithLifecycle(null).value
     Scaffold(
         topBar = {
-            CustomTopBar(stringResource(Res.string.setting_language), popBack = popBack)
+            CustomTopBar(stringResource(Res.string.setting_theme), popBack = popBack)
         }) { innerPadding ->
         Column(
             modifier = Modifier.padding(innerPadding)

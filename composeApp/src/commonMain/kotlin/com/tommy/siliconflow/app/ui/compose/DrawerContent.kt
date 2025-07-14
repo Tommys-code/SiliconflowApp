@@ -148,7 +148,7 @@ private fun ColumnScope.DrawerCenterList(
                 modifier = Modifier.padding(vertical = 8.dp, horizontal = 8.dp)
             )
         }
-        itemsIndexed(sessionList) { index, data ->
+        itemsIndexed(sessionList) { _, data ->
             var itemCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
             val background = if (currentSession == data) {
                 AppTheme.colorScheme.container

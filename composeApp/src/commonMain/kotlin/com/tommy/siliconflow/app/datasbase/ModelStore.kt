@@ -1,6 +1,7 @@
 package com.tommy.siliconflow.app.datasbase
 
 import com.tommy.siliconflow.app.model.LocalAIModel
+import com.tommy.siliconflow.app.model.LocalAITextModel
 import com.tommy.siliconflow.app.model.TextAIModel
 import com.tommy.siliconflow.app.model.toLocalAIModel
 import com.tommy.siliconflow.app.network.JsonSerializationHelper
@@ -12,7 +13,7 @@ import kotlinx.coroutines.launch
 import siliconflowapp.composeapp.generated.resources.Res
 
 interface ModelStore {
-    val currentModel: Flow<LocalAIModel>
+    val currentModel: Flow<LocalAITextModel>
     val modelList: Flow<List<LocalAIModel>>
 
     suspend fun changeModel(model: LocalAIModel)
@@ -23,7 +24,7 @@ class ModelStoreImpl(
     scope: CoroutineScope
 ) : ModelStore {
 
-    private val textAIModelList = MutableStateFlow<List<LocalAIModel>>(emptyList())
+    private val textAIModelList = MutableStateFlow<List<LocalAITextModel>>(emptyList())
 
     override val currentModel =
         settingDataStore.getCurrentModel().combine(textAIModelList) { name, models ->
@@ -39,7 +40,7 @@ class ModelStoreImpl(
                     it.toLocalAIModel()
                 }
             }.let {
-                textAIModelList.value = it
+                textAIModelList.value = it.filter { model -> !model.disabled }
             }
         }
     }

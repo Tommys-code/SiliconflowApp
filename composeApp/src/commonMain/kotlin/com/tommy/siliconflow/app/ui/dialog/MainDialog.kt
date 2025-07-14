@@ -48,6 +48,7 @@ internal fun MainViewDialog(
             is MainDialog.DeleteSession -> DeleteSessionDialog(listOf(it.session), doEvent)
             is MainDialog.DeleteSessions -> DeleteSessionDialog(it.sessions, doEvent)
             is MainDialog.DeleteChatHistory -> DeleteChatHistoryDialog(it.history, doEvent)
+            is MainDialog.ChooseImage -> ChooseImageDialog(doEvent)
         }
     }
 }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
@@ -43,6 +45,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalFocusManager
@@ -55,13 +58,23 @@ import androidx.compose.ui.unit.round
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.mikepenz.markdown.model.State
 import com.tommy.siliconflow.app.data.ChatResult
+import com.tommy.siliconflow.app.data.MainDialog
 import com.tommy.siliconflow.app.data.MarkdownChatHistory
+import com.tommy.siliconflow.app.data.VLMImageData
+import com.tommy.siliconflow.app.data.generateReferenceImageInfo
+import com.tommy.siliconflow.app.data.getUrl
+import com.tommy.siliconflow.app.model.LocalAITextModel
+import com.tommy.siliconflow.app.model.TextAIModel
+import com.tommy.siliconflow.app.model.TextAIType
+import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.SilMarkDown
 import com.tommy.siliconflow.app.ui.dialog.ChatPopup
 import com.tommy.siliconflow.app.ui.dialog.ChatPopupState
 import com.tommy.siliconflow.app.ui.dialog.ChatType
 import com.tommy.siliconflow.app.ui.theme.AppColor
 import com.tommy.siliconflow.app.ui.theme.AppTheme
+import com.tommy.siliconflow.app.utils.rememberImageProcessing
+import com.tommy.siliconflow.app.viewmodel.MainViewEvent
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
 import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.launch
@@ -70,6 +83,9 @@ import org.jetbrains.compose.resources.stringResource
 import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.enter_question
 import siliconflowapp.composeapp.generated.resources.ic_arrow_down
+import siliconflowapp.composeapp.generated.resources.ic_close
+import siliconflowapp.composeapp.generated.resources.ic_delete
+import siliconflowapp.composeapp.generated.resources.ic_image
 import siliconflowapp.composeapp.generated.resources.ic_send
 
 @Composable
@@ -82,9 +98,12 @@ internal fun ChatView(
     val listState = rememberLazyListState()
     val scope = rememberCoroutineScope()
     val popupState = remember { mutableStateOf<ChatPopupState?>(null) }
+    val imageProcessing = rememberImageProcessing()
 
     val localAnswer = viewModel.answer.conflate().collectAsStateWithLifecycle(null)
     val chatHistory = viewModel.chatHistory.collectAsStateWithLifecycle(emptyList())
+    val model = viewModel.currentModel.collectAsStateWithLifecycle(null).value
+    val imageData = viewModel.mainViewState.imageData.collectAsStateWithLifecycle().value
 
     Column(modifier = modifier.fillMaxSize()) {
         Box(Modifier.fillMaxWidth().weight(1f)) {
@@ -132,51 +151,66 @@ internal fun ChatView(
             modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 12.dp),
             border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant),
         ) {
-            Row {
-                TextField(
-                    value = text,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 4,
-                    label = { Text(stringResource(Res.string.enter_question)) },
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = AppColor.Transparent,
-                        unfocusedIndicatorColor = AppColor.Transparent,
-                    ),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
-                    onValueChange = { text = it },
-                    keyboardActions = KeyboardActions(onNext = {
-                        text = text.copy(
-                            text = text.text + "\n",
-                            selection = TextRange(text.text.length + 1)
-                        )
-                    })
-                )
-                IconButton(
-                    modifier = Modifier
-                        .align(Alignment.Bottom)
-                        .padding(end = 8.dp, bottom = 8.dp)
-                        .clip(CircleShape)
-                        .size(30.dp),
-                    colors = IconButtonDefaults.iconButtonColors(
-                        containerColor = AppTheme.colorScheme.iconContainer,
-                        disabledContainerColor = AppTheme.colorScheme.iconContainerDisable,
-                        contentColor = AppTheme.colorScheme.icon,
-                    ),
-                    enabled = text.text.isNotBlank() && localAnswer.value !is ChatResult.Progress,
-                    onClick = {
-                        if (text.text.isNotBlank()) {
-                            scope.launch { listState.scrollToItem(0) }
-                            focusManager.clearFocus()
-                            viewModel.sendData(text.text)
-                            text = TextFieldValue("")
-                        }
-                    },
-                ) {
-                    Icon(
-                        modifier = Modifier.size(16.dp).rotate(270f),
-                        painter = painterResource(Res.drawable.ic_send),
-                        contentDescription = "send",
+            Column {
+                VLMImageView(imageData) { viewModel.doEvent(it) }
+                Row {
+                    TextField(
+                        value = text,
+                        modifier = Modifier.weight(1f),
+                        maxLines = 4,
+                        label = { Text(stringResource(Res.string.enter_question)) },
+                        colors = TextFieldDefaults.colors(
+                            focusedIndicatorColor = AppColor.Transparent,
+                            unfocusedIndicatorColor = AppColor.Transparent,
+                        ),
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Next),
+                        onValueChange = { text = it },
+                        keyboardActions = KeyboardActions(onNext = {
+                            text = text.copy(
+                                text = text.text + "\n",
+                                selection = TextRange(text.text.length + 1)
+                            )
+                        })
                     )
+                    ChooseImageButton(imageData, model) { viewModel.doEvent(it) }
+                    IconButton(
+                        modifier = Modifier
+                            .align(Alignment.Bottom)
+                            .padding(end = 8.dp, bottom = 8.dp)
+                            .clip(CircleShape)
+                            .size(30.dp),
+                        colors = IconButtonDefaults.iconButtonColors(
+                            containerColor = AppTheme.colorScheme.iconContainer,
+                            disabledContainerColor = AppTheme.colorScheme.iconContainerDisable,
+                            contentColor = AppTheme.colorScheme.icon,
+                        ),
+                        enabled = text.text.isNotBlank() && localAnswer.value !is ChatResult.Progress,
+                        onClick = {
+                            if (text.text.isNotBlank()) {
+                                focusManager.clearFocus()
+                                scope.launch {
+                                    listState.scrollToItem(0)
+                                    if (model?.type == TextAIType.VLM) {
+                                        viewModel.sendData(
+                                            text.text,
+                                            viewModel.mainViewState.imageData.value?.generateReferenceImageInfo(
+                                                imageProcessing
+                                            )
+                                        )
+                                    } else {
+                                        viewModel.sendData(text.text)
+                                    }
+                                    text = TextFieldValue("")
+                                }
+                            }
+                        },
+                    ) {
+                        Icon(
+                            modifier = Modifier.size(16.dp).rotate(270f),
+                            painter = painterResource(Res.drawable.ic_send),
+                            contentDescription = "send",
+                        )
+                    }
                 }
             }
         }
@@ -252,7 +286,7 @@ private fun ChatBox(chat: MarkdownChatHistory, popupState: MutableState<ChatPopu
     }
     chat.chatHistory.send?.let {
         var sendCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
-        Box(
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .onGloballyPositioned { cor -> sendCoordinates = cor }
@@ -268,8 +302,18 @@ private fun ChatBox(chat: MarkdownChatHistory, popupState: MutableState<ChatPopu
                         }
                     )
                 },
-            contentAlignment = Alignment.CenterEnd,
+            horizontalAlignment = Alignment.End
         ) {
+            it.image?.let { images ->
+                Row {
+                    images.forEach { data ->
+                        ImageItem(
+                            url = data,
+                            modifier = Modifier.size(80.dp)
+                        )
+                    }
+                }
+            }
             Text(
                 it.content,
                 modifier = Modifier
@@ -285,6 +329,67 @@ private fun ChatBox(chat: MarkdownChatHistory, popupState: MutableState<ChatPopu
                     .padding(horizontal = 20.dp, vertical = 8.dp),
                 style = MaterialTheme.typography.bodyLarge,
             )
+        }
+    }
+}
+
+@Composable
+private fun RowScope.ChooseImageButton(
+    imageData: List<VLMImageData>?,
+    model: LocalAITextModel?,
+    doEvent: (MainViewEvent) -> Unit,
+) {
+    if (model?.type == TextAIType.VLM) {
+        IconButton(
+            modifier = Modifier
+                .align(Alignment.Bottom)
+                .padding(end = 8.dp, bottom = 8.dp)
+                .clip(CircleShape)
+                .size(30.dp),
+            colors = IconButtonDefaults.iconButtonColors(
+                containerColor = AppTheme.colorScheme.iconContainer,
+                disabledContainerColor = AppTheme.colorScheme.iconContainerDisable,
+                contentColor = AppTheme.colorScheme.icon,
+            ),
+            onClick = {
+                doEvent.invoke(MainViewEvent.ShowOrHideDialog(MainDialog.ChooseImage))
+            },
+            enabled = imageData.isNullOrEmpty(),
+        ) {
+            Icon(
+                painter = painterResource(Res.drawable.ic_image),
+                contentDescription = "choose image",
+                modifier = Modifier.size(16.dp)
+            )
+        }
+    }
+}
+
+@Composable
+private fun VLMImageView(
+    data: List<VLMImageData>?,
+    doEvent: (MainViewEvent) -> Unit,
+) {
+    if (data?.isNotEmpty() == true) {
+        LazyRow(modifier = Modifier.padding(horizontal = 12.dp).padding(top = 8.dp)) {
+            items(data) {
+                it.getUrl()?.let { uri ->
+                    Box(modifier = Modifier.size(80.dp)) {
+                        ImageItem(
+                            url = uri,
+                            modifier = Modifier.size(70.dp).align(Alignment.BottomStart),
+                            contentScale = ContentScale.Crop,
+                        )
+                        Icon(
+                            painter = painterResource(Res.drawable.ic_close),
+                            contentDescription = "delete",
+                            modifier = Modifier.align(Alignment.TopEnd).size(20.dp).clickable {
+                                doEvent.invoke(MainViewEvent.RemoveImageData(it))
+                            }
+                        )
+                    }
+                }
+            }
         }
     }
 }

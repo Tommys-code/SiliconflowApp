@@ -1,5 +1,6 @@
 package com.tommy.siliconflow.app.datasbase
 
+import com.tommy.siliconflow.app.data.VLMImageData
 import com.tommy.siliconflow.app.data.db.ChatContent
 import com.tommy.siliconflow.app.data.db.ChatHistory
 import com.tommy.siliconflow.app.data.db.Role
@@ -15,8 +16,18 @@ interface ChatHistoryStore {
 
     suspend fun updateSession(session: Session): Boolean
     suspend fun deleteSession(session: List<Session>): Boolean
-    suspend fun createSession(userID: String, title: String): Pair<Session, Long>
-    suspend fun insertSendHistory(sessionID: Long, content: String): Long
+    suspend fun createSession(
+        userID: String,
+        title: String,
+        images: List<VLMImageData>? = null
+    ): Pair<Session, Long>
+
+    suspend fun insertSendHistory(
+        sessionID: Long,
+        content: String,
+        images: List<VLMImageData>? = null
+    ): Long
+
     suspend fun updateReceiveHistory(chatID: Long, content: ChatContent, thinking: String? = null)
     suspend fun deleteChatHistory(chatHistory: ChatHistory): Boolean
 }
@@ -32,21 +43,41 @@ class ChatHistoryStoreImpl(private val appDatabase: AppDatabase) : ChatHistorySt
         return appDatabase.chatHistoryDao().getChatByID(sessionID)
     }
 
-    override suspend fun createSession(userID: String, title: String): Pair<Session, Long> {
+    override suspend fun createSession(
+        userID: String,
+        title: String,
+        images: List<VLMImageData>?
+    ): Pair<Session, Long> {
         val time = Clock.System.now().toEpochMilliseconds()
         val session =
             appDatabase.sessionDao().insertAndGet(
                 Session(title = title, updateTime = time, userID = userID)
             )
-        val chatID = insertHistory(ChatContent(title, Role.USER).sendHistory(session.id, time))
+        val chatID = insertHistory(
+            ChatContent(
+                title,
+                Role.USER,
+                images?.mapNotNull { it.url ?: it.referenceImageInfo?.fileName }
+            ).sendHistory(session.id, time)
+        )
         return session to chatID
     }
 
-    override suspend fun insertSendHistory(sessionID: Long, content: String): Long {
+    override suspend fun insertSendHistory(
+        sessionID: Long,
+        content: String,
+        images: List<VLMImageData>?
+    ): Long {
         val time = Clock.System.now().toEpochMilliseconds()
         val id =
             appDatabase.chatHistoryDao()
-                .insert(ChatContent(content, Role.USER).sendHistory(sessionID, time))
+                .insert(
+                    ChatContent(
+                        content,
+                        Role.USER,
+                        images?.mapNotNull { it.url ?: it.referenceImageInfo?.fileName }
+                    ).sendHistory(sessionID, time)
+                )
         appDatabase.sessionDao().updateTime(sessionID, time)
         return id
     }

@@ -12,4 +12,6 @@ data class TextAIModel(
     val maxTokens: Int,
     val manu: String,
     val desc: String,
+    val disabled: Boolean?,
+    val type: String,
 )

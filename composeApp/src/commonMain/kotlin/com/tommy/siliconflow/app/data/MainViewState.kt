@@ -29,6 +29,9 @@ class MainViewState {
     private val _selectSessions = MutableStateFlow<List<Session>?>(null)
     val selectSessions: StateFlow<List<Session>?> = _selectSessions
 
+    private val _imageData: MutableStateFlow<List<VLMImageData>?> = MutableStateFlow(null)
+    val imageData: StateFlow<List<VLMImageData>?> = _imageData
+
     fun toggleDrawer(scope: CoroutineScope) {
         multipleSelection(false)
         scope.launch {
@@ -77,6 +80,18 @@ class MainViewState {
             }
         }
     }
+
+    fun addImageData(imageData: VLMImageData) {
+        _imageData.value = _imageData.value?.plus(imageData) ?: listOf(imageData)
+    }
+
+    fun clearImageData() {
+        _imageData.value = null
+    }
+
+    fun removeImageData(imageData: VLMImageData) {
+        _imageData.value = _imageData.value?.filterNot { it == imageData }
+    }
 }
 
 @Stable
@@ -90,4 +105,5 @@ sealed class MainDialog {
     class DeleteSession(val session: Session) : MainDialog()
     class DeleteSessions(val sessions: List<Session>) : MainDialog()
     class DeleteChatHistory(val history: ChatHistory) : MainDialog()
+    data object ChooseImage : MainDialog()
 }
