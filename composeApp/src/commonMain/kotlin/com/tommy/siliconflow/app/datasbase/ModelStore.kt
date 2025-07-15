@@ -14,7 +14,7 @@ import siliconflowapp.composeapp.generated.resources.Res
 
 interface ModelStore {
     val currentModel: Flow<LocalAITextModel>
-    val modelList: Flow<List<LocalAIModel>>
+    val modelList: Flow<List<LocalAITextModel>>
 
     suspend fun changeModel(model: LocalAIModel)
 }

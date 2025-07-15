@@ -4,12 +4,10 @@ import com.tommy.siliconflow.app.data.ChatResult
 import com.tommy.siliconflow.app.data.MarkdownChatHistory
 import com.tommy.siliconflow.app.data.VLMImageData
 import com.tommy.siliconflow.app.data.db.ChatHistory
-import com.tommy.siliconflow.app.data.db.Role
 import com.tommy.siliconflow.app.data.db.Session
 import com.tommy.siliconflow.app.data.db.SessionType
 import com.tommy.siliconflow.app.data.network.ChatResponse
 import com.tommy.siliconflow.app.data.network.ChoiceDelta
-import com.tommy.siliconflow.app.data.network.Message
 import com.tommy.siliconflow.app.datasbase.ChatHistoryStore
 import com.tommy.siliconflow.app.datasbase.SettingDataStore
 import com.tommy.siliconflow.app.extensions.appendContent
@@ -17,7 +15,6 @@ import com.tommy.siliconflow.app.extensions.toChatContent
 import com.tommy.siliconflow.app.extensions.toChatContentResult
 import com.tommy.siliconflow.app.extensions.toMarkdownChatHistory
 import com.tommy.siliconflow.app.network.service.SSEService
-import com.tommy.siliconflow.app.platform.ImageData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

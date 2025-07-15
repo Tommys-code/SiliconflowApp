@@ -40,7 +40,7 @@ class ImageProcessing(
         val imageLoader = ImageLoader.Builder(context).build()
         return (imageLoader.execute(request) as? SuccessResult)?.image?.toByteArray()?.let {
             ReferenceImageInfo(
-                base64Data = "data:image/jpeg;base64, ${Base64.encode(it)}",
+                base64Data = "data:image/jpeg;base64,${Base64.encode(it)}",
                 fileName = localImageProcessing.saveToLocal(it, uri),
             )
         }

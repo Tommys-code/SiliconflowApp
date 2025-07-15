@@ -45,7 +45,7 @@ internal fun MainScreen(
     viewModel: MainViewModel = koinViewModel(),
     onNavigate: (route: Any) -> Unit,
 ) {
-    val hostState = SnackbarHostState()
+    val hostState = remember { SnackbarHostState() }
     val model = viewModel.currentModel.collectAsStateWithLifecycle(null).value
 
     Box {

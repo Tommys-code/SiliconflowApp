@@ -63,16 +63,18 @@ import com.tommy.siliconflow.app.data.MarkdownChatHistory
 import com.tommy.siliconflow.app.data.VLMImageData
 import com.tommy.siliconflow.app.data.generateReferenceImageInfo
 import com.tommy.siliconflow.app.data.getUrl
+import com.tommy.siliconflow.app.extensions.getUri
 import com.tommy.siliconflow.app.model.LocalAITextModel
-import com.tommy.siliconflow.app.model.TextAIModel
 import com.tommy.siliconflow.app.model.TextAIType
 import com.tommy.siliconflow.app.ui.components.ImageItem
 import com.tommy.siliconflow.app.ui.components.SilMarkDown
+import com.tommy.siliconflow.app.ui.components.ThreeDotLoading
 import com.tommy.siliconflow.app.ui.dialog.ChatPopup
 import com.tommy.siliconflow.app.ui.dialog.ChatPopupState
 import com.tommy.siliconflow.app.ui.dialog.ChatType
 import com.tommy.siliconflow.app.ui.theme.AppColor
 import com.tommy.siliconflow.app.ui.theme.AppTheme
+import com.tommy.siliconflow.app.utils.ImageProcessing
 import com.tommy.siliconflow.app.utils.rememberImageProcessing
 import com.tommy.siliconflow.app.viewmodel.MainViewEvent
 import com.tommy.siliconflow.app.viewmodel.MainViewModel
@@ -84,7 +86,6 @@ import siliconflowapp.composeapp.generated.resources.Res
 import siliconflowapp.composeapp.generated.resources.enter_question
 import siliconflowapp.composeapp.generated.resources.ic_arrow_down
 import siliconflowapp.composeapp.generated.resources.ic_close
-import siliconflowapp.composeapp.generated.resources.ic_delete
 import siliconflowapp.composeapp.generated.resources.ic_image
 import siliconflowapp.composeapp.generated.resources.ic_send
 
@@ -124,11 +125,12 @@ internal fun ChatView(
                         }
 
                         is ChatResult.Error -> item { Text(it.e.message.orEmpty()) }
+                        is ChatResult.Start -> item { ThreeDotLoading(modifier = Modifier.padding(16.dp)) }
                         else -> {}
                     }
                 }
                 items(chatHistory.value) { chat ->
-                    ChatBox(chat, popupState)
+                    ChatBox(chat, imageProcessing, popupState)
                 }
             }
 
@@ -243,7 +245,11 @@ private fun ThinkingText(
 }
 
 @Composable
-private fun ChatBox(chat: MarkdownChatHistory, popupState: MutableState<ChatPopupState?>) {
+private fun ChatBox(
+    chat: MarkdownChatHistory,
+    imageProcessing: ImageProcessing,
+    popupState: MutableState<ChatPopupState?>,
+) {
     chat.contentMarkdown?.let {
         var receiveCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
         ReceiveText(
@@ -308,8 +314,9 @@ private fun ChatBox(chat: MarkdownChatHistory, popupState: MutableState<ChatPopu
                 Row {
                     images.forEach { data ->
                         ImageItem(
-                            url = data,
-                            modifier = Modifier.size(80.dp)
+                            url = data.getUri(imageProcessing),
+                            modifier = Modifier.size(80.dp),
+                            contentScale = ContentScale.Crop,
                         )
                     }
                 }
